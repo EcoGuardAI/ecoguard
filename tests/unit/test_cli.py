@@ -5,7 +5,9 @@ This module tests the command-line interface functionality.
 """
 
 import json
+import os
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
@@ -20,6 +22,30 @@ from ecoguard_ai.cli import (
 )
 from ecoguard_ai.core.issue import Fix, Impact, Issue, Severity
 from ecoguard_ai.core.result import AnalysisResult, ProjectAnalysisResult
+
+
+@contextmanager
+def windows_safe_tempfile(content: str, suffix: str = ".py"):
+    """
+    Create a temporary file that works safely on Windows.
+    
+    Windows has issues with deleting files that are still open,
+    so we need to properly close them before deletion.
+    """
+    # Create a temporary file without auto-deletion
+    fd, filepath = tempfile.mkstemp(suffix=suffix, text=True)
+    try:
+        # Write content to the file
+        with os.fdopen(fd, "w") as f:
+            f.write(content)
+        # Return the path for use
+        yield filepath
+    finally:
+        # Ensure file is deleted even if test fails
+        try:
+            os.unlink(filepath)
+        except OSError:
+            pass  # File might already be deleted
 
 
 class TestCLIMain:
@@ -91,38 +117,26 @@ class TestAnalyzeCommand:
 
     def test_analyze_with_valid_file(self):
         """Test analyze command with valid Python file."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write("print('hello world')")
-            f.flush()
-
-            try:
-                runner = CliRunner()
-                result = runner.invoke(cli, ["analyze", f.name])
-                # Should execute without error (may exit with 0 or 1 depending
-                # on issues found)
-                assert result.exit_code in [0, 1]
-            finally:
-                Path(f.name).unlink(missing_ok=True)
+        with windows_safe_tempfile("print('hello world')") as temp_file:
+            runner = CliRunner()
+            result = runner.invoke(cli, ["analyze", temp_file])
+            # Should execute without error (may exit with 0 or 1 depending
+            # on issues found)
+            assert result.exit_code in [0, 1]
 
     def test_analyze_with_json_format(self):
         """Test analyze command with JSON output format."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write("print('hello world')")
-            f.flush()
+        with windows_safe_tempfile("print('hello world')") as temp_file:
+            runner = CliRunner()
+            result = runner.invoke(cli, ["analyze", temp_file, "--format", "json"])
+            assert result.exit_code in [0, 1]
 
+            # Try to parse output as JSON
             try:
-                runner = CliRunner()
-                result = runner.invoke(cli, ["analyze", f.name, "--format", "json"])
-                assert result.exit_code in [0, 1]
-
-                # Try to parse output as JSON
-                try:
-                    json.loads(result.output)
-                except json.JSONDecodeError:
-                    # If output contains ANSI codes or other text, that's also valid
-                    pass
-            finally:
-                Path(f.name).unlink(missing_ok=True)
+                json.loads(result.output)
+            except json.JSONDecodeError:
+                # If output contains ANSI codes or other text, that's also valid
+                pass
 
     def test_analyze_with_text_format(self):
         """Test analyze command with text output format."""
