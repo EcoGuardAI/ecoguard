@@ -249,8 +249,8 @@ class Issue:
     def __str__(self) -> str:
         """String representation of the issue."""
         severity_str = (
-            self.severity.value 
-            if isinstance(self.severity, Severity) 
+            self.severity.value
+            if isinstance(self.severity, Severity)
             else str(self.severity)
         )
         return (
