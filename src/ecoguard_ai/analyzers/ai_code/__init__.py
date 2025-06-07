@@ -18,7 +18,7 @@ from ecoguard_ai.core.issue import Fix, Impact, Issue
 class VerboseCodeRule(ASTVisitorRule):
     """Detect overly verbose code patterns common in AI-generated code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="verbose_ai_code",
             name="Verbose AI-Generated Code",
@@ -62,8 +62,12 @@ class VerboseCodeRule(ASTVisitorRule):
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
-                    description="Simplify return logic by returning expressions directly",
-                    replacement_code="# return expression instead of if/else with True/False",
+                    description=(
+                        "Simplify return logic by returning expressions directly"
+                    ),
+                    replacement_code=(
+                        "# return expression instead of if/else with True/False"
+                    ),
                 ),
                 impact=Impact(maintainability=0.4, performance=-0.03),
             )
@@ -100,7 +104,7 @@ class VerboseCodeRule(ASTVisitorRule):
 class RedundantVariableRule(ASTVisitorRule):
     """Detect redundant variable assignments common in AI code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="redundant_variable",
             name="Redundant Variable Assignment",
@@ -131,11 +135,17 @@ class RedundantVariableRule(ASTVisitorRule):
                 ):
 
                     issue = self.create_issue(
-                        message=f"Variable '{stmt1.targets[0].id}' is assigned and immediately returned",
+                        message=(
+                            f"Variable '{stmt1.targets[0].id}' is assigned "
+                            "and immediately returned"
+                        ),
                         node=stmt1,
                         file_path=self.current_file_path,
                         suggested_fix=Fix(
-                            description="Return the expression directly without intermediate variable",
+                            description=(
+                                "Return the expression directly without "
+                                "intermediate variable"
+                            ),
                             replacement_code="# return expression",
                         ),
                         impact=Impact(maintainability=0.2, performance=-0.02),
@@ -146,7 +156,7 @@ class RedundantVariableRule(ASTVisitorRule):
 class DuplicateFunctionRule(ASTVisitorRule):
     """Detect similar function patterns that might be duplicates."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="duplicate_function",
             name="Potential Duplicate Function",
@@ -167,12 +177,20 @@ class DuplicateFunctionRule(ASTVisitorRule):
             for func2 in self.functions[i + 1 :]:
                 if self._are_functions_similar(func1, func2):
                     issue = self.create_issue(
-                        message=f"Function '{func1.name}' appears similar to '{func2.name}'",
+                        message=(
+                            f"Function '{func1.name}' appears similar to "
+                            f"'{func2.name}'"
+                        ),
                         node=func1,
                         file_path=self.current_file_path,
                         suggested_fix=Fix(
-                            description="Consider extracting common logic into a shared function",
-                            replacement_code="# Extract common patterns into reusable functions",
+                            description=(
+                                "Consider extracting common logic into a "
+                                "shared function"
+                            ),
+                            replacement_code=(
+                                "# Extract common patterns into reusable functions"
+                            ),
                         ),
                         impact=Impact(maintainability=-0.8, performance=-0.05),
                     )
@@ -200,7 +218,7 @@ class DuplicateFunctionRule(ASTVisitorRule):
 class OverCommentedCodeRule(ASTVisitorRule):
     """Detect over-commented code common in AI-generated code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="over_commented",
             name="Over-Commented Code",
@@ -212,14 +230,20 @@ class OverCommentedCodeRule(ASTVisitorRule):
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """Check for obvious comments in functions."""
         # This would need source code parsing to detect comments
-        # For now, check for overly simple functions that probably don't need much documentation
+        # For now, check for overly simple functions that probably don't need
+        # much documentation
         if self._is_trivial_function(node) and self._has_docstring(node):
             issue = self.create_issue(
-                message=f"Function '{node.name}' is trivial but has detailed documentation",
+                message=(
+                    f"Function '{node.name}' is trivial but has "
+                    "detailed documentation"
+                ),
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
-                    description="Consider simplifying documentation for trivial functions",
+                    description=(
+                        "Consider simplifying documentation for trivial functions"
+                    ),
                     replacement_code="# Simplify or remove unnecessary documentation",
                 ),
                 impact=Impact(maintainability=0.1, performance=-0.01),
@@ -245,7 +269,7 @@ class OverCommentedCodeRule(ASTVisitorRule):
 class UnnecessaryTypeChecksRule(ASTVisitorRule):
     """Detect unnecessary type checks common in defensive AI code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="unnecessary_type_check",
             name="Unnecessary Type Check",
@@ -308,7 +332,7 @@ class AICodeAnalyzer(BaseAnalyzer):
     - AI-generated boilerplate identification
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="AI Code Analyzer",
             description="Analyzes AI-generated code inefficiencies and patterns",

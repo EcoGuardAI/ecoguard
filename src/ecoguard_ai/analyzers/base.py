@@ -7,7 +7,7 @@ must implement to integrate with the EcoGuard AI analysis pipeline.
 
 import ast
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from ecoguard_ai.core.issue import Issue
 
@@ -96,7 +96,7 @@ class BaseRule(ABC):
         pass
 
     def create_issue(
-        self, message: str, node: ast.AST, file_path: str, **kwargs
+        self, message: str, node: ast.AST, file_path: str, **kwargs: Any
     ) -> Issue:
         """
         Helper method to create an Issue from a rule violation.
@@ -134,7 +134,7 @@ class ASTVisitorRule(BaseRule, ast.NodeVisitor):
     This is the most common type of rule for static analysis.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.issues: List[Issue] = []
         self.current_source_code: str = ""
@@ -175,7 +175,7 @@ class ASTVisitorRule(BaseRule, ast.NodeVisitor):
         self.finalize()
         return self.issues.copy()
 
-    def add_issue(self, message: str, node: ast.AST, **kwargs) -> None:
+    def add_issue(self, message: str, node: ast.AST, **kwargs: Any) -> None:
         """
         Add an issue to the current list.
 
@@ -212,21 +212,25 @@ def get_source_segment(source_code: str, node: ast.AST) -> str:
     if start_line == end_line:
         # Single line
         line = lines[start_line]
-        start_col = getattr(node, "col_offset", 0)
-        end_col = getattr(node, "end_col_offset", len(line))
-        return line[start_col:end_col]
+        start_col: int = int(getattr(node, "col_offset", 0))
+        end_col_attr = getattr(node, "end_col_offset", len(line))
+        end_col: int = int(end_col_attr) if end_col_attr is not None else len(line)
+        return str(line[start_col:end_col])
     else:
         # Multiple lines
         result_lines = []
         for i in range(start_line, min(end_line + 1, len(lines))):
             if i == start_line:
                 # First line
-                start_col = getattr(node, "col_offset", 0)
-                result_lines.append(lines[i][start_col:])
+                line_start_col: int = int(getattr(node, "col_offset", 0))
+                result_lines.append(lines[i][line_start_col:])
             elif i == end_line:
                 # Last line
-                end_col = getattr(node, "end_col_offset", len(lines[i]))
-                result_lines.append(lines[i][:end_col])
+                end_col_attr = getattr(node, "end_col_offset", len(lines[i]))
+                line_end_col: int = (
+                    int(end_col_attr) if end_col_attr is not None else len(lines[i])
+                )
+                result_lines.append(lines[i][:line_end_col])
             else:
                 # Middle lines
                 result_lines.append(lines[i])

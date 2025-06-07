@@ -8,7 +8,7 @@ the analysis pipeline to represent findings and their metadata.
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 
 class Severity(Enum):
@@ -20,7 +20,7 @@ class Severity(Enum):
     ERROR = "error"
     CRITICAL = "critical"
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         """Enable comparison between severity levels."""
         if not isinstance(other, Severity):
             return NotImplemented
@@ -98,8 +98,8 @@ class Issue:
 
     # Core identification
     rule_id: str
-    category: str  # Will be converted to Category enum
-    severity: str  # Will be converted to Severity enum
+    category: Union[str, Category]  # Will be converted to Category enum
+    severity: Union[str, Severity]  # Will be converted to Severity enum
     message: str
 
     # Location information
@@ -118,17 +118,17 @@ class Issue:
     # Metadata
     rule_name: Optional[str] = None
     rule_description: Optional[str] = None
-    references: List[str] = None
-    tags: List[str] = None
+    references: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
 
     # AI-specific metadata
     ai_generated: bool = False
     ai_confidence: Optional[float] = None
 
     # Timestamps
-    created_at: datetime = None
+    created_at: Optional[datetime] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization processing."""
         if self.references is None:
             self.references = []
@@ -139,9 +139,17 @@ class Issue:
 
         # Convert string enums to proper enums
         if isinstance(self.severity, str):
-            self.severity = Severity(self.severity.lower())
+            try:
+                self.severity = Severity(self.severity.lower())
+            except ValueError:
+                # Handle unknown severity values
+                self.severity = Severity.INFO
         if isinstance(self.category, str):
-            self.category = Category(self.category.lower())
+            try:
+                self.category = Category(self.category.lower())
+            except ValueError:
+                # Handle unknown category values
+                self.category = Category.SYSTEM
 
     @property
     def severity_score(self) -> int:
@@ -153,7 +161,16 @@ class Issue:
             Severity.ERROR: 4,
             Severity.CRITICAL: 5,
         }
-        return severity_scores.get(self.severity, 0)
+        # Ensure severity is a Severity enum
+        if isinstance(self.severity, Severity):
+            return severity_scores.get(self.severity, 0)
+        else:
+            # Convert string to enum first
+            try:
+                severity_enum = Severity(self.severity.lower())
+                return severity_scores.get(severity_enum, 0)
+            except (ValueError, AttributeError):
+                return 0
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert issue to dictionary representation."""
@@ -231,7 +248,12 @@ class Issue:
 
     def __str__(self) -> str:
         """String representation of the issue."""
+        severity_str = (
+            self.severity.value
+            if isinstance(self.severity, Severity)
+            else str(self.severity)
+        )
         return (
-            f"{self.file_path}:{self.line}:{self.column}: {self.severity.value}: "
+            f"{self.file_path}:{self.line}:{self.column}: {severity_str}: "
             f"{self.message} [{self.rule_id}]"
         )

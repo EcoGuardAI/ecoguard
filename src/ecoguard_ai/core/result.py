@@ -13,6 +13,42 @@ from typing import Any, Dict, List, Optional
 from ecoguard_ai.core.issue import Category, Issue, Severity
 
 
+def _matches_severity(issue: Issue, severity: Severity) -> bool:
+    """Helper function to safely compare issue severity with target severity."""
+    if isinstance(issue.severity, Severity):
+        return issue.severity == severity
+    if isinstance(issue.severity, str):
+        try:
+            return Severity(issue.severity.lower()) == severity
+        except ValueError:
+            pass
+    return False
+
+
+def _matches_category(issue: Issue, category: Category) -> bool:
+    """Helper function to safely compare issue category with target category."""
+    if isinstance(issue.category, Category):
+        return issue.category == category
+    if isinstance(issue.category, str):
+        try:
+            return Category(issue.category.lower()) == category
+        except ValueError:
+            pass
+    return False
+
+
+def _get_severity_enum(issue: Issue) -> Severity:
+    """Helper function to get Severity enum from issue."""
+    if isinstance(issue.severity, Severity):
+        return issue.severity
+    if isinstance(issue.severity, str):
+        try:
+            return Severity(issue.severity.lower())
+        except ValueError:
+            pass
+    return Severity.INFO
+
+
 @dataclass
 class AnalysisResult:
     """
@@ -27,7 +63,7 @@ class AnalysisResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
     analysis_time: Optional[datetime] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization processing."""
         if self.analysis_time is None:
             self.analysis_time = datetime.now(timezone.utc)
@@ -40,30 +76,30 @@ class AnalysisResult:
     @property
     def error_count(self) -> int:
         """Number of error-level issues."""
-        return len([i for i in self.issues if i.severity == Severity.ERROR])
+        return len([i for i in self.issues if _matches_severity(i, Severity.ERROR)])
 
     @property
     def warning_count(self) -> int:
         """Number of warning-level issues."""
-        return len([i for i in self.issues if i.severity == Severity.WARNING])
+        return len([i for i in self.issues if _matches_severity(i, Severity.WARNING)])
 
     @property
     def info_count(self) -> int:
         """Number of info-level issues."""
-        return len([i for i in self.issues if i.severity == Severity.INFO])
+        return len([i for i in self.issues if _matches_severity(i, Severity.INFO)])
 
     @property
     def critical_count(self) -> int:
         """Number of critical-level issues."""
-        return len([i for i in self.issues if i.severity == Severity.CRITICAL])
+        return len([i for i in self.issues if _matches_severity(i, Severity.CRITICAL)])
 
     def get_issues_by_category(self, category: Category) -> List[Issue]:
         """Get all issues for a specific category."""
-        return [i for i in self.issues if i.category == category]
+        return [i for i in self.issues if _matches_category(i, category)]
 
     def get_issues_by_severity(self, severity: Severity) -> List[Issue]:
         """Get all issues for a specific severity level."""
-        return [i for i in self.issues if i.severity == severity]
+        return [i for i in self.issues if _matches_severity(i, severity)]
 
     def get_issues_by_rule(self, rule_id: str) -> List[Issue]:
         """Get all issues for a specific rule."""
@@ -72,7 +108,8 @@ class AnalysisResult:
     def has_errors(self) -> bool:
         """Check if any error-level or critical issues were found."""
         return any(
-            i.severity in [Severity.ERROR, Severity.CRITICAL] for i in self.issues
+            _get_severity_enum(i) in [Severity.ERROR, Severity.CRITICAL]
+            for i in self.issues
         )
 
     def calculate_green_score(self) -> float:
@@ -92,13 +129,14 @@ class AnalysisResult:
         # Simple scoring based on severity and count
         penalty = 0
         for issue in green_issues:
-            if issue.severity == Severity.CRITICAL:
+            severity = _get_severity_enum(issue)
+            if severity == Severity.CRITICAL:
                 penalty += 20
-            elif issue.severity == Severity.ERROR:
+            elif severity == Severity.ERROR:
                 penalty += 15
-            elif issue.severity == Severity.WARNING:
+            elif severity == Severity.WARNING:
                 penalty += 10
-            elif issue.severity == Severity.INFO:
+            elif severity == Severity.INFO:
                 penalty += 5
 
         score = max(0.0, 100.0 - penalty)
@@ -121,13 +159,14 @@ class AnalysisResult:
         # Security issues are weighted more heavily
         penalty = 0
         for issue in security_issues:
-            if issue.severity == Severity.CRITICAL:
+            severity = _get_severity_enum(issue)
+            if severity == Severity.CRITICAL:
                 penalty += 30
-            elif issue.severity == Severity.ERROR:
+            elif severity == Severity.ERROR:
                 penalty += 20
-            elif issue.severity == Severity.WARNING:
+            elif severity == Severity.WARNING:
                 penalty += 10
-            elif issue.severity == Severity.INFO:
+            elif severity == Severity.INFO:
                 penalty += 3
 
         score = max(0.0, 100.0 - penalty)
@@ -193,7 +232,7 @@ class ProjectAnalysisResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
     analysis_time: Optional[datetime] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization processing."""
         if self.analysis_time is None:
             self.analysis_time = datetime.now(timezone.utc)
@@ -253,6 +292,17 @@ class ProjectAnalysisResult:
 
         scores = [result.calculate_security_score() for result in self.file_results]
         return sum(scores) / len(scores)
+
+    def has_errors(self) -> bool:
+        """Check if the project has any error-level or critical issues."""
+        for result in self.file_results:
+            if result.error_count > 0 or result.critical_count > 0:
+                return True
+        return False
+
+    def get_all_issues(self) -> List[Issue]:
+        """Get all issues from all files (same as all_issues property but as method)."""
+        return self.all_issues
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert project result to dictionary representation."""

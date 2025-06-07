@@ -14,15 +14,15 @@ from rich.table import Table
 from rich.text import Text
 
 from ecoguard_ai.core.analyzer import AnalysisConfig, EcoGuardAnalyzer
-from ecoguard_ai.core.issue import Severity
+from ecoguard_ai.core.issue import Category, Severity
 from ecoguard_ai.core.result import AnalysisResult, ProjectAnalysisResult
 
 console = Console()
 
 
 @click.group()
-@click.version_option(version="0.1.0", prog_name="EcoGuard AI")
-def cli():
+@click.version_option(version="0.1.2", prog_name="EcoGuard AI")
+def cli() -> None:
     """
     EcoGuard AI: AI-augmented software development pipeline solution.
 
@@ -70,7 +70,7 @@ def analyze(
     no_green: bool,
     no_ai_code: bool,
     config: Optional[str],
-):
+) -> None:
     """
     Analyze Python code for quality, security, and sustainability issues.
 
@@ -92,7 +92,8 @@ def analyze(
         if config:
             # TODO: Implement config file loading in future stages
             console.print(
-                f"[yellow]Config file support coming in future release: {config}[/yellow]"
+                f"[yellow]Config file support coming in future release: "
+                f"{config}[/yellow]"
             )
 
         # Initialize analyzer
@@ -124,15 +125,15 @@ def analyze(
 
 
 @cli.command()
-def version():
+def version() -> None:
     """Show EcoGuard AI version information."""
-    console.print("[green]EcoGuard AI v0.1.0[/green]")
+    console.print("[green]EcoGuard AI v0.1.2[/green]")
     console.print("AI-augmented software development pipeline solution")
     console.print("https://github.com/ecoguard-ai/ecoguard-ai")
 
 
 @cli.command()
-def rules():
+def rules() -> None:
     """List all available analysis rules."""
     console.print("[blue]Available Analysis Rules[/blue]")
     console.print(
@@ -145,7 +146,7 @@ def rules():
 
 def _display_single_result(
     result: AnalysisResult, format_type: str, output_file: Optional[str]
-):
+) -> None:
     """Display analysis result for a single file."""
     if format_type == "json":
         output_text = result.to_json()
@@ -184,7 +185,7 @@ def _display_project_result(
     project_result: ProjectAnalysisResult,
     format_type: str,
     output_file: Optional[str],
-):
+) -> None:
     """Display analysis results for a project."""
     if format_type == "json":
         output_text = project_result.to_json()
@@ -229,7 +230,7 @@ def _display_project_result(
         _display_project_table(project_result)
 
 
-def _display_table_result(result: AnalysisResult):
+def _display_table_result(result: AnalysisResult) -> None:
     """Display a single file result in table format."""
     console.print(f"\n[blue]Analysis Results for:[/blue] {result.file_path}")
 
@@ -263,11 +264,23 @@ def _display_table_result(result: AnalysisResult):
     issues_table.add_column("Message", style="white")
 
     for issue in result.issues:
-        severity_color = _get_severity_color(issue.severity)
+        # Handle Union types by converting to proper enum types
+        severity = (
+            issue.severity
+            if isinstance(issue.severity, Severity)
+            else Severity(issue.severity)
+        )
+        category = (
+            issue.category
+            if isinstance(issue.category, Category)
+            else Category(issue.category)
+        )
+
+        severity_color = _get_severity_color(severity)
         issues_table.add_row(
             str(issue.line),
-            Text(issue.severity.value.upper(), style=severity_color),
-            issue.category.value,
+            Text(severity.value.upper(), style=severity_color),
+            category.value,
             issue.rule_id,
             issue.message,
         )
@@ -275,7 +288,7 @@ def _display_table_result(result: AnalysisResult):
     console.print(issues_table)
 
 
-def _display_project_table(project_result: ProjectAnalysisResult):
+def _display_project_table(project_result: ProjectAnalysisResult) -> None:
     """Display project results in table format."""
     console.print(
         f"\n[blue]Project Analysis Results:[/blue] {project_result.project_path}"
@@ -343,7 +356,7 @@ def _get_severity_color(severity: Severity) -> str:
     return severity_colors.get(severity, "white")
 
 
-def main():
+def main() -> None:
     """Main entry point for the CLI."""
     cli()
 

@@ -1,10 +1,7 @@
 """
 Quality analyzer for EcoGuard AI.
 
-This module i                    suggested_fix=Fix(
-                        description=f"Remove unused variable '{var_name}' or prefix with underscore",
-                        replacement_code=f"# Remove line or rename to _{var_name}"
-                    ),ments code quality analysis rules including:
+This module implements code quality analysis rules including:
 - Unused variables and imports
 - Function complexity metrics
 - Naming conventions
@@ -21,7 +18,7 @@ from ecoguard_ai.core.issue import Fix, Impact, Issue
 class UnusedVariableRule(ASTVisitorRule):
     """Detect unused variables in function scopes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="unused_variable",
             name="Unused Variable",
@@ -85,7 +82,7 @@ class UnusedVariableRule(ASTVisitorRule):
 class UnusedImportRule(ASTVisitorRule):
     """Detect unused imports at module level."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="unused_import",
             name="Unused Import",
@@ -154,11 +151,16 @@ class FunctionComplexityRule(ASTVisitorRule):
 
         if complexity > self.max_complexity:
             issue = self.create_issue(
-                message=f"Function '{node.name}' has complexity {complexity} (max: {self.max_complexity})",
+                message=(
+                    f"Function '{node.name}' has complexity {complexity} "
+                    f"(max: {self.max_complexity})"
+                ),
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
-                    description="Consider breaking this function into smaller functions",
+                    description=(
+                        "Consider breaking this function into smaller functions"
+                    ),
                     replacement_code="# Refactor into smaller, more focused functions",
                 ),
                 impact=Impact(maintainability=-0.8, performance=-0.3),
@@ -212,11 +214,17 @@ class LongParameterListRule(ASTVisitorRule):
 
         if param_count > self.max_params:
             issue = self.create_issue(
-                message=f"Function '{node.name}' has {param_count} parameters (max: {self.max_params})",
+                message=(
+                    f"Function '{node.name}' has {param_count} parameters "
+                    f"(max: {self.max_params})"
+                ),
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
-                    description="Consider using a data class or dictionary to group related parameters",
+                    description=(
+                        "Consider using a data class or dictionary to group "
+                        "related parameters"
+                    ),
                     replacement_code="# Group related parameters into a data structure",
                 ),
                 impact=Impact(maintainability=-0.5),
@@ -237,7 +245,7 @@ class QualityAnalyzer(BaseAnalyzer):
     - Code structure improvements
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="Quality Analyzer",
             description="Analyzes code quality and maintainability",
