@@ -28,7 +28,7 @@ from ecoguard_ai.core.result import AnalysisResult, ProjectAnalysisResult
 def windows_safe_tempfile(content: str, suffix: str = ".py"):
     """
     Create a temporary file that works safely on Windows.
-    
+
     Windows has issues with deleting files that are still open,
     so we need to properly close them before deletion.
     """

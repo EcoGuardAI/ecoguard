@@ -99,7 +99,7 @@ class Issue:
     # Core identification
     rule_id: str
     category: Union[str, Category]  # Will be converted to Category enum
-    severity: Union[str, Severity]  # Will be converted to Severity enum  
+    severity: Union[str, Severity]  # Will be converted to Severity enum
     message: str
 
     # Location information
@@ -146,7 +146,7 @@ class Issue:
                 self.severity = Severity.INFO  # type: ignore
         if isinstance(self.category, str):
             try:
-                self.category = Category(self.category.lower())  # type: ignore  
+                self.category = Category(self.category.lower())  # type: ignore
             except ValueError:
                 # Handle unknown category values
                 self.category = Category.SYSTEM  # type: ignore

@@ -108,7 +108,8 @@ class AnalysisResult:
     def has_errors(self) -> bool:
         """Check if any error-level or critical issues were found."""
         return any(
-            _get_severity_enum(i) in [Severity.ERROR, Severity.CRITICAL] for i in self.issues
+            _get_severity_enum(i) in [Severity.ERROR, Severity.CRITICAL]
+            for i in self.issues
         )
 
     def calculate_green_score(self) -> float:
