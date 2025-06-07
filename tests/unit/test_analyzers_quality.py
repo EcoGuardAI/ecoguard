@@ -6,9 +6,7 @@ This module tests the quality-specific analysis rules.
 
 import ast
 
-from ecoguard_ai.analyzers.quality import (
-    QualityAnalyzer,
-)
+from ecoguard_ai.analyzers.quality import QualityAnalyzer
 
 
 class TestQualityAnalyzer:

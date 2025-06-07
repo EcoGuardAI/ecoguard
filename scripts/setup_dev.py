@@ -17,11 +17,11 @@ from pathlib import Path
 def run_command(cmd: str, description: str) -> bool:
     """
     Run a command and return True if successful.
-    
+
     Args:
         cmd: The shell command to execute
         description: Description of what the command does
-        
+
     Returns:
         True if command succeeded, False otherwise
     """
@@ -43,13 +43,13 @@ def run_command(cmd: str, description: str) -> bool:
 def main() -> None:
     """
     Set up the development environment.
-    
+
     This function installs all necessary dependencies, sets up pre-commit hooks,
     runs initial checks, and provides guidance for next steps.
-    
+
     Returns:
         None
-        
+
     Exits:
         System exit with code 1 if Python version is too old
     """
