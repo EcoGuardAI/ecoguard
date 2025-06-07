@@ -49,12 +49,18 @@ class StringConcatenationRule(ASTVisitorRule):
         ):
 
             issue = self.create_issue(
-                message="String concatenation in loop is inefficient. Use join() or f-strings instead",
+                message=(
+                    "String concatenation in loop is inefficient. "
+                    "Use join() or f-strings instead"
+                ),
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
                     description="Use ''.join() for concatenating strings in loops",
-                    replacement_code="# Use parts = []; parts.append(item); result = ''.join(parts)",
+                    replacement_code=(
+                        "# Use parts = []; parts.append(item); "
+                        "result = ''.join(parts)"
+                    ),
                 ),
                 impact=Impact(performance=-0.15, carbon_impact=5.0),
             )
@@ -90,7 +96,9 @@ class ListComprehensionRule(ASTVisitorRule):
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
-                    description="Replace with list comprehension for better performance",
+                    description=(
+                        "Replace with list comprehension for better performance"
+                    ),
                     replacement_code="# result = [expr for item in iterable]",
                 ),
                 impact=Impact(performance=-0.08, carbon_impact=3.0),
@@ -182,7 +190,9 @@ class FileHandlingRule(ASTVisitorRule):
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
-                    description="Use context manager (with statement) for file handling",
+                    description=(
+                        "Use context manager (with statement) for file handling"
+                    ),
                     replacement_code="# with open(filename) as f:",
                 ),
                 impact=Impact(carbon_impact=1.0, performance=-0.05),
@@ -213,7 +223,10 @@ class IneffientLoopRule(ASTVisitorRule):
         """Check for range(len()) anti-pattern."""
         if self._is_range_len_pattern(node):
             issue = self.create_issue(
-                message="Use enumerate() instead of range(len()) for better readability and performance",
+                message=(
+                    "Use enumerate() instead of range(len()) for better "
+                    "readability and performance"
+                ),
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(

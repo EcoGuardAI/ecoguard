@@ -1,54 +1,93 @@
 # Pre-commit configuration for EcoGuard AI
 # See https://pre-commit.com for more information
 
+default_language_version:
+  python: python3.12
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+      - id: check-toml
+      - id: check-json
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: debug-statements
-      - id: check-toml
+      - id: check-docstring-first
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: mixed-line-ending
+        args: ['--fix=lf']
 
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 25.1.0
     hooks:
       - id: black
         language_version: python3
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 6.0.1
     hooks:
       - id: isort
         args: ["--profile", "black"]
 
   - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+    rev: 7.2.0
     hooks:
       - id: flake8
         args: ["--max-line-length=88", "--extend-ignore=E203,W503"]
+        additional_dependencies:
+          - flake8-docstrings
+          - flake8-type-checking
+          - flake8-bugbear
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
+    rev: v1.16.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-PyYAML, types-toml]
-        args: ["--ignore-missing-imports"]
+        additional_dependencies: [types-PyYAML, types-toml, types-setuptools]
+        args: ["--ignore-missing-imports", "--strict"]
 
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.5
+    rev: 1.8.3
     hooks:
       - id: bandit
         args: ["-c", "pyproject.toml"]
 
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.11.13
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: ["--convention=google"]
+
+  # Security checks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+
   # Future: Add EcoGuard AI self-analysis hook
-  # - repo: local
-  #   hooks:
-  #     - id: ecoguard-ai
-  #       name: EcoGuard AI Analysis
+  - repo: local
+    hooks:
+      - id: ecoguard-ai
+        name: EcoGuard AI Analysis
+        entry: ecoguard
+        args: [analyze, --format, table]
+        language: python
+        files: '\.py$'
+        pass_filenames: true
+        fail_fast: false
+        verbose: true
   #       entry: ecoguard analyze
   #       language: system
   #       files: \.py$

@@ -1,7 +1,7 @@
 # EcoGuard AI: The Sentient Core for Future-Proof Software Pipelines
 
 ![EcoGuard AI Logo](https://img.shields.io/badge/EcoGuard-AI-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-0.1.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-0.1.2-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)
 
 ## 🌟 Project Vision
@@ -52,12 +52,17 @@ To embed comprehensive oversight directly into developer workflows and CI/CD pro
 - [x] Define project architecture and module interfaces
 - [x] Set up initial documentation framework
 - [x] Establish coding standards and contribution guidelines
+- [x] GitHub Actions CI/CD pipeline configured and working
 
-**Stage 2: Core Dependencies & Environment Setup**
-- [ ] Set up Python development environment with pyproject.toml
-- [ ] Configure development tools (black, flake8, mypy, pytest)
-- [ ] Create basic CLI entry point structure
-- [ ] Set up GitHub Actions for CI/CD
+**Stage 2: Core Dependencies & Environment Setup** ✅ **COMPLETED**
+- [x] Enhanced Python development environment with comprehensive pyproject.toml
+- [x] Configured advanced development tools (black, flake8, mypy, pytest, ruff, tox)
+- [x] Enhanced CLI entry point structure with robust functionality
+- [x] Advanced GitHub Actions CI/CD with multi-matrix testing, security scans, and artifact collection
+- [x] Pre-commit hooks with comprehensive code quality checks
+- [x] Development automation tools (Makefile, setup scripts, tox environments)
+- [x] Fixed code formatting issues and line length violations
+- [x] Verified complete development workflow and package building functionality
 
 **Stage 3: AST Analysis Research & Prototyping**
 - [ ] Deep dive into Python AST module capabilities
@@ -354,6 +359,129 @@ To embed comprehensive oversight directly into developer workflows and CI/CD pro
 - [ ] Create plugin marketplace and ecosystem
 - [ ] Implement community rule sharing
 - [ ] Add integration with major development platforms and tools
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Install from PyPI (coming soon)
+pip install ecoguard-ai
+
+# Or install from source
+git clone https://github.com/ecoguard-ai/ecoguard-ai.git
+cd ecoguard-ai
+pip install -e .
+```
+
+### Basic Usage
+
+```bash
+# Analyze a Python file
+ecoguard analyze myfile.py
+
+# Analyze a directory with JSON output
+ecoguard analyze src/ --format json --output results.json
+
+# Get help
+ecoguard --help
+```
+
+## 🛠️ Development Setup
+
+### Quick Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/ecoguard-ai/ecoguard-ai.git
+cd ecoguard-ai
+
+# Automated setup (recommended)
+python scripts/setup_dev.py
+
+# Or manual setup
+make dev-install
+```
+
+### Development Commands
+
+```bash
+# Run all tests
+make test
+
+# Run tests across all Python versions
+make test-all
+
+# Format code
+make format
+
+# Run linting checks
+make lint
+
+# Type checking
+make type-check
+
+# Security scans
+make security
+
+# Run EcoGuard AI on itself
+make self-analyze
+
+# Run all CI checks locally
+make ci
+
+# Clean build artifacts
+make clean
+```
+
+### Using Tox
+
+```bash
+# Run tests across all Python versions
+tox
+
+# Run specific environment
+tox -e lint      # Linting
+tox -e type      # Type checking
+tox -e security  # Security scans
+tox -e format    # Code formatting
+```
+
+### Pre-commit Hooks
+
+EcoGuard AI uses pre-commit hooks to ensure code quality:
+
+```bash
+# Install hooks (done automatically with dev setup)
+pre-commit install
+
+# Run hooks manually
+pre-commit run --all-files
+```
+
+### Development Dependencies
+
+- **Code Quality**: black, isort, flake8, ruff, mypy
+- **Testing**: pytest, pytest-cov, pytest-xdist, pytest-mock
+- **Security**: bandit, safety, pip-audit, detect-secrets, semgrep
+- **Documentation**: sphinx, sphinx-rtd-theme, myst-parser
+- **Automation**: pre-commit, tox, twine
+
+### Project Structure
+
+```
+ecoguard-ai/
+├── src/ecoguard_ai/         # Main package
+│   ├── cli/                 # Command-line interface
+│   ├── core/                # Core analysis engine
+│   ├── analyzers/           # Specific analyzers
+│   └── utils/               # Utilities
+├── tests/                   # Test suite
+├── examples/                # Usage examples
+├── scripts/                 # Development scripts
+├── .github/workflows/       # CI/CD pipelines
+└── docs/                    # Documentation
+```
 
 ## 🤝 Contributing
 

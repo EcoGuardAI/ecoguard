@@ -46,7 +46,8 @@ class TestEcoGuardAnalyzer:
 
         assert analyzer.config is not None
         assert isinstance(analyzer.config, AnalysisConfig)
-        # Note: _analyzers list will be empty since placeholder analyzers return no issues
+        # Note: _analyzers list will be empty since placeholder analyzers
+        # return no issues
         assert isinstance(analyzer._analyzers, list)
 
     def test_analyzer_with_custom_config(self):

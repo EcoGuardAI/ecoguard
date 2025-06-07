@@ -21,7 +21,7 @@ console = Console()
 
 
 @click.group()
-@click.version_option(version="0.1.0", prog_name="EcoGuard AI")
+@click.version_option(version="0.1.2", prog_name="EcoGuard AI")
 def cli():
     """
     EcoGuard AI: AI-augmented software development pipeline solution.
@@ -92,7 +92,8 @@ def analyze(
         if config:
             # TODO: Implement config file loading in future stages
             console.print(
-                f"[yellow]Config file support coming in future release: {config}[/yellow]"
+                f"[yellow]Config file support coming in future release: "
+                f"{config}[/yellow]"
             )
 
         # Initialize analyzer
@@ -126,7 +127,7 @@ def analyze(
 @cli.command()
 def version():
     """Show EcoGuard AI version information."""
-    console.print("[green]EcoGuard AI v0.1.0[/green]")
+    console.print("[green]EcoGuard AI v0.1.2[/green]")
     console.print("AI-augmented software development pipeline solution")
     console.print("https://github.com/ecoguard-ai/ecoguard-ai")
 

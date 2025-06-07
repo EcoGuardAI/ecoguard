@@ -62,8 +62,12 @@ class VerboseCodeRule(ASTVisitorRule):
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
-                    description="Simplify return logic by returning expressions directly",
-                    replacement_code="# return expression instead of if/else with True/False",
+                    description=(
+                        "Simplify return logic by returning expressions directly"
+                    ),
+                    replacement_code=(
+                        "# return expression instead of if/else with True/False"
+                    ),
                 ),
                 impact=Impact(maintainability=0.4, performance=-0.03),
             )
@@ -131,11 +135,17 @@ class RedundantVariableRule(ASTVisitorRule):
                 ):
 
                     issue = self.create_issue(
-                        message=f"Variable '{stmt1.targets[0].id}' is assigned and immediately returned",
+                        message=(
+                            f"Variable '{stmt1.targets[0].id}' is assigned "
+                            "and immediately returned"
+                        ),
                         node=stmt1,
                         file_path=self.current_file_path,
                         suggested_fix=Fix(
-                            description="Return the expression directly without intermediate variable",
+                            description=(
+                                "Return the expression directly without "
+                                "intermediate variable"
+                            ),
                             replacement_code="# return expression",
                         ),
                         impact=Impact(maintainability=0.2, performance=-0.02),
@@ -167,12 +177,20 @@ class DuplicateFunctionRule(ASTVisitorRule):
             for func2 in self.functions[i + 1 :]:
                 if self._are_functions_similar(func1, func2):
                     issue = self.create_issue(
-                        message=f"Function '{func1.name}' appears similar to '{func2.name}'",
+                        message=(
+                            f"Function '{func1.name}' appears similar to "
+                            f"'{func2.name}'"
+                        ),
                         node=func1,
                         file_path=self.current_file_path,
                         suggested_fix=Fix(
-                            description="Consider extracting common logic into a shared function",
-                            replacement_code="# Extract common patterns into reusable functions",
+                            description=(
+                                "Consider extracting common logic into a "
+                                "shared function"
+                            ),
+                            replacement_code=(
+                                "# Extract common patterns into reusable functions"
+                            ),
                         ),
                         impact=Impact(maintainability=-0.8, performance=-0.05),
                     )
@@ -212,14 +230,20 @@ class OverCommentedCodeRule(ASTVisitorRule):
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """Check for obvious comments in functions."""
         # This would need source code parsing to detect comments
-        # For now, check for overly simple functions that probably don't need much documentation
+        # For now, check for overly simple functions that probably don't need
+        # much documentation
         if self._is_trivial_function(node) and self._has_docstring(node):
             issue = self.create_issue(
-                message=f"Function '{node.name}' is trivial but has detailed documentation",
+                message=(
+                    f"Function '{node.name}' is trivial but has "
+                    "detailed documentation"
+                ),
                 node=node,
                 file_path=self.current_file_path,
                 suggested_fix=Fix(
-                    description="Consider simplifying documentation for trivial functions",
+                    description=(
+                        "Consider simplifying documentation for trivial functions"
+                    ),
                     replacement_code="# Simplify or remove unnecessary documentation",
                 ),
                 impact=Impact(maintainability=0.1, performance=-0.01),
