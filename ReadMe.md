@@ -1,7 +1,7 @@
 # EcoGuard AI: The Sentient Core for Future-Proof Software Pipelines
 
 ![EcoGuard AI Logo](https://img.shields.io/badge/EcoGuard-AI-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-0.1.2-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-0.1.3-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)
 
 ## 🌟 Project Vision

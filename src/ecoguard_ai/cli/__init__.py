@@ -6,7 +6,7 @@ This module provides the main entry point for the EcoGuard AI command-line tool.
 
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import click
 from rich.console import Console
@@ -21,7 +21,7 @@ console = Console()
 
 
 @click.group()
-@click.version_option(version="0.1.2", prog_name="EcoGuard AI")
+@click.version_option(version="0.1.3", prog_name="EcoGuard AI")
 def cli() -> None:
     """
     EcoGuard AI: AI-augmented software development pipeline solution.
@@ -55,6 +55,27 @@ def cli() -> None:
 @click.option("--no-green", is_flag=True, help="Disable green software analysis")
 @click.option("--no-ai-code", is_flag=True, help="Disable AI code analysis")
 @click.option(
+    "--enable-ast-research",
+    is_flag=True,
+    help="Enable advanced AST research capabilities (Stage 3 integration)",
+)
+@click.option(
+    "--ast-depth",
+    type=click.Choice(["basic", "detailed", "comprehensive"]),
+    default="basic",
+    help="AST analysis depth (requires --enable-ast-research)",
+)
+@click.option(
+    "--enable-pattern-analysis",
+    is_flag=True,
+    help="Enable AST pattern analysis (requires --enable-ast-research)",
+)
+@click.option(
+    "--enable-complexity-metrics",
+    is_flag=True,
+    help="Enable complexity metrics analysis (requires --enable-ast-research)",
+)
+@click.option(
     "--config",
     "-c",
     type=click.Path(exists=True),
@@ -69,6 +90,10 @@ def analyze(
     no_security: bool,
     no_green: bool,
     no_ai_code: bool,
+    enable_ast_research: bool,
+    ast_depth: str,
+    enable_pattern_analysis: bool,
+    enable_complexity_metrics: bool,
     config: Optional[str],
 ) -> None:
     """
@@ -86,6 +111,11 @@ def analyze(
             enable_security=not no_security,
             enable_green=not no_green,
             enable_ai_code=not no_ai_code,
+            # AST Research integration (Stage 3)
+            enable_ast_research=enable_ast_research,
+            ast_research_depth=ast_depth,
+            enable_pattern_analysis=enable_pattern_analysis,
+            enable_complexity_metrics=enable_complexity_metrics,
         )
 
         # Load config file if provided
@@ -98,6 +128,19 @@ def analyze(
 
         # Initialize analyzer
         analyzer = EcoGuardAnalyzer(analysis_config)
+
+        # Show AST research status if enabled
+        if enable_ast_research:
+            if analyzer.ast_explorer:
+                console.print(
+                    f"[green]✓[/green] AST Research enabled "
+                    f"(depth: {ast_depth}, patterns: {enable_pattern_analysis}, "
+                    f"complexity: {enable_complexity_metrics})"
+                )
+            else:
+                console.print(
+                    "[yellow]⚠[/yellow] AST Research requested but module unavailable"
+                )
 
         # Analyze the path
         path_obj = Path(path)
@@ -236,6 +279,10 @@ def _display_table_result(result: AnalysisResult) -> None:
 
     if not result.issues:
         console.print("[green]✅ No issues found![/green]")
+
+        # Show AST research data even if no issues found
+        if "ast_research" in result.metadata:
+            _display_ast_research_summary(result.metadata["ast_research"])
         return
 
     # Summary table
@@ -254,6 +301,10 @@ def _display_table_result(result: AnalysisResult) -> None:
     )
 
     console.print(summary_table)
+
+    # Display AST research data if available
+    if "ast_research" in result.metadata:
+        _display_ast_research_summary(result.metadata["ast_research"])
 
     # Issues table
     issues_table = Table(title="Issues Found")
@@ -342,6 +393,98 @@ def _display_project_table(project_result: ProjectAnalysisResult) -> None:
         console.print(files_table)
     else:
         console.print("[green]✅ No issues found in any files![/green]")
+
+
+def _display_ast_research_summary(ast_data: Dict[str, Any]) -> None:
+    """Display AST research data in table format."""
+    console.print("\n[blue]AST Research Summary[/blue]")
+
+    # Basic metrics table
+    if any(
+        key in ast_data
+        for key in ["max_depth", "node_type_counts", "complexity_metrics"]
+    ):
+        metrics_table = Table(title="AST Metrics")
+        metrics_table.add_column("Metric", style="cyan")
+        metrics_table.add_column("Value", style="magenta")
+
+        if "max_depth" in ast_data:
+            metrics_table.add_row("AST Max Depth", str(ast_data["max_depth"]))
+
+        if "complexity_metrics" in ast_data:
+            complexity = ast_data["complexity_metrics"]
+            if "cyclomatic" in complexity:
+                metrics_table.add_row(
+                    "Cyclomatic Complexity", str(complexity["cyclomatic"])
+                )
+            if "max_nesting" in complexity:
+                metrics_table.add_row(
+                    "Max Nesting Level", str(complexity["max_nesting"])
+                )
+            if "function_count" in complexity:
+                metrics_table.add_row(
+                    "Function Count", str(complexity["function_count"])
+                )
+
+        if "node_type_counts" in ast_data:
+            node_counts = ast_data["node_type_counts"]
+            total_nodes = sum(node_counts.values())
+            metrics_table.add_row("Total AST Nodes", str(total_nodes))
+
+            # Show top 5 most common node types
+            sorted_nodes = sorted(
+                node_counts.items(), key=lambda x: x[1], reverse=True
+            )[:5]
+            if sorted_nodes:
+                top_nodes = ", ".join(
+                    [f"{node}({count})" for node, count in sorted_nodes]
+                )
+                metrics_table.add_row("Top Node Types", top_nodes)
+
+        console.print(metrics_table)
+
+    # Pattern analysis table
+    if "patterns" in ast_data:
+        patterns = ast_data["patterns"]
+        if any(len(pattern_list) > 0 for pattern_list in patterns.values()):
+            pattern_table = Table(title="Pattern Analysis")
+            pattern_table.add_column("Pattern Type", style="cyan")
+            pattern_table.add_column("Count", style="magenta")
+            pattern_table.add_column("Examples", style="white")
+
+            for pattern_type, pattern_list in patterns.items():
+                if pattern_list:
+                    count = len(pattern_list)
+                    # Get first few examples with their names/ids
+                    examples = []
+                    for pattern in pattern_list[:3]:  # Show up to 3 examples
+                        # Handle ASTNodeInfo objects
+                        if hasattr(pattern, "attributes") and isinstance(
+                            pattern.attributes, dict
+                        ):
+                            if "name" in pattern.attributes:
+                                examples.append(pattern.attributes["name"])
+                            elif "id" in pattern.attributes:
+                                examples.append(pattern.attributes["id"])
+                            else:
+                                examples.append(f"Line {getattr(pattern, 'line', '?')}")
+                        else:
+                            # Fallback for other object types
+                            examples.append(f"Line {getattr(pattern, 'line', '?')}")
+
+                    example_text = ", ".join(examples) if examples else "N/A"
+                    if len(pattern_list) > 3:
+                        example_text += "..."
+
+                    pattern_table.add_row(
+                        pattern_type.replace("_", " ").title(), str(count), example_text
+                    )
+
+            console.print(pattern_table)
+
+    # Show error if AST research failed
+    if "error" in ast_data:
+        console.print(f"[yellow]AST Research Error:[/yellow] {ast_data['error']}")
 
 
 def _get_severity_color(severity: Severity) -> str:

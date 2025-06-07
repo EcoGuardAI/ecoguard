@@ -37,6 +37,12 @@ class AnalysisConfig:
     enable_green: bool = True
     enable_ai_code: bool = True
 
+    # AST Research capabilities (Phase 1 Stage 3 Integration)
+    enable_ast_research: bool = False
+    ast_research_depth: str = "basic"  # basic, detailed, comprehensive
+    enable_pattern_analysis: bool = False
+    enable_complexity_metrics: bool = False
+
     # Output configuration
     output_format: str = "json"  # json, text, xml
     output_file: Optional[str] = None
@@ -60,6 +66,18 @@ class EcoGuardAnalyzer:
     def __init__(self, config: Optional[AnalysisConfig] = None):
         self.config = config or AnalysisConfig()
         self._analyzers: List[BaseAnalyzer] = []
+
+        # Initialize AST research capabilities if enabled
+        self.ast_explorer = None
+        if self.config.enable_ast_research:
+            try:
+                from ecoguard_ai.research.ast_analysis import ASTExplorer
+
+                self.ast_explorer = ASTExplorer()
+            except ImportError:
+                # AST research module not available, continue without it
+                pass
+
         self._initialize_analyzers()
 
     def _initialize_analyzers(self) -> None:
@@ -108,6 +126,43 @@ class EcoGuardAnalyzer:
             source_code = file_path.read_text(encoding="utf-8")
             tree = ast.parse(source_code, filename=str(file_path))
 
+            # Enhanced AST analysis if research is enabled
+            ast_research_data = {}
+            if self.ast_explorer and self.config.enable_ast_research:
+                try:
+                    # Perform comprehensive AST analysis
+                    ast_metrics = self.ast_explorer.analyze_code(
+                        source_code, f"Analysis of {file_path.name}"
+                    )
+
+                    # Collect pattern analysis if enabled
+                    if self.config.enable_pattern_analysis:
+                        patterns = self.ast_explorer.find_specific_patterns(
+                            source_code,
+                            [
+                                "function_def",
+                                "class_def",
+                                "import",
+                                "loop",
+                                "comprehension",
+                            ],
+                        )
+                        ast_research_data["patterns"] = patterns
+
+                    # Add complexity metrics to research data
+                    if self.config.enable_complexity_metrics:
+                        ast_research_data["complexity_metrics"] = (
+                            ast_metrics.complexity_metrics
+                        )
+                        ast_research_data["max_depth"] = ast_metrics.max_depth
+                        ast_research_data["node_type_counts"] = dict(
+                            ast_metrics.node_type_counts
+                        )
+
+                except Exception as e:
+                    # Continue analysis even if AST research fails
+                    ast_research_data["error"] = f"AST research failed: {str(e)}"
+
             # Run all analyzers
             all_issues: List[Issue] = []
             metadata: Dict[str, Any] = {
@@ -115,6 +170,10 @@ class EcoGuardAnalyzer:
                 "file_size": file_path.stat().st_size,
                 "line_count": len(source_code.splitlines()),
             }
+
+            # Add AST research data to metadata if available
+            if ast_research_data:
+                metadata["ast_research"] = ast_research_data
 
             for analyzer in self._analyzers:
                 issues = analyzer.analyze(tree, source_code, str(file_path))
