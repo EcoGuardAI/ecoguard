@@ -7,7 +7,6 @@ This module tests the AnalysisResult class and related functionality.
 import json
 from datetime import datetime
 
-
 from ecoguard_ai.core.issue import Category, Impact, Issue, Severity
 from ecoguard_ai.core.result import AnalysisResult
 

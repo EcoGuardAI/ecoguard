@@ -7,7 +7,7 @@ name = "ecoguard-ai"
 version = "0.1.2"
 description = "AI-augmented software development pipeline solution for quality, security, and environmental sustainability"
 readme = "ReadMe.md"
-license = "MIT"
+license = {text = "MIT"}
 authors = [
     {name = "EcoGuard AI Team", email = "team@ecoguard-ai.org"}
 ]

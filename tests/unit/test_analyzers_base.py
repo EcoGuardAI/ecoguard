@@ -6,7 +6,6 @@ This module tests the base analyzer classes and rule framework.
 
 import ast
 
-
 from ecoguard_ai.analyzers.base import ASTVisitorRule, BaseAnalyzer, BaseRule
 from ecoguard_ai.core.issue import Issue
 
