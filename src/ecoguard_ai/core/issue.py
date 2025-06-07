@@ -140,16 +140,16 @@ class Issue:
         # Convert string enums to proper enums
         if isinstance(self.severity, str):
             try:
-                self.severity = Severity(self.severity.lower())  # type: ignore
+                self.severity = Severity(self.severity.lower())
             except ValueError:
                 # Handle unknown severity values
-                self.severity = Severity.INFO  # type: ignore
+                self.severity = Severity.INFO
         if isinstance(self.category, str):
             try:
-                self.category = Category(self.category.lower())  # type: ignore
+                self.category = Category(self.category.lower())
             except ValueError:
                 # Handle unknown category values
-                self.category = Category.SYSTEM  # type: ignore
+                self.category = Category.SYSTEM
 
     @property
     def severity_score(self) -> int:
@@ -161,7 +161,16 @@ class Issue:
             Severity.ERROR: 4,
             Severity.CRITICAL: 5,
         }
-        return severity_scores.get(self.severity, 0)
+        # Ensure severity is a Severity enum
+        if isinstance(self.severity, Severity):
+            return severity_scores.get(self.severity, 0)
+        else:
+            # Convert string to enum first
+            try:
+                severity_enum = Severity(self.severity.lower())
+                return severity_scores.get(severity_enum, 0)
+            except (ValueError, AttributeError):
+                return 0
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert issue to dictionary representation."""
@@ -239,7 +248,12 @@ class Issue:
 
     def __str__(self) -> str:
         """String representation of the issue."""
+        severity_str = (
+            self.severity.value 
+            if isinstance(self.severity, Severity) 
+            else str(self.severity)
+        )
         return (
-            f"{self.file_path}:{self.line}:{self.column}: {self.severity.value}: "
+            f"{self.file_path}:{self.line}:{self.column}: {severity_str}: "
             f"{self.message} [{self.rule_id}]"
         )

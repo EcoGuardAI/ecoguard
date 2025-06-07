@@ -22,7 +22,7 @@ console = Console()
 
 @click.group()
 @click.version_option(version="0.1.2", prog_name="EcoGuard AI")
-def cli():
+def cli() -> None:
     """
     EcoGuard AI: AI-augmented software development pipeline solution.
 
@@ -70,7 +70,7 @@ def analyze(
     no_green: bool,
     no_ai_code: bool,
     config: Optional[str],
-):
+) -> None:
     """
     Analyze Python code for quality, security, and sustainability issues.
 

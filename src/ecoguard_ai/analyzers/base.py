@@ -215,9 +215,9 @@ def get_source_segment(source_code: str, node: ast.AST) -> str:
         start_col = getattr(node, "col_offset", 0)
         end_col = getattr(node, "end_col_offset", len(line))
         # Ensure proper types for slicing
-        start_col = int(start_col) if start_col is not None else 0
-        end_col = int(end_col) if end_col is not None else len(line)
-        return line[start_col:end_col]
+        start_col_int = int(start_col) if start_col is not None else 0
+        end_col_int = int(end_col) if end_col is not None else len(line)
+        return line[start_col_int:end_col_int]
     else:
         # Multiple lines
         result_lines = []
@@ -225,13 +225,13 @@ def get_source_segment(source_code: str, node: ast.AST) -> str:
             if i == start_line:
                 # First line
                 start_col = getattr(node, "col_offset", 0)
-                start_col = int(start_col) if start_col is not None else 0
-                result_lines.append(lines[i][start_col:])
+                start_col_int = int(start_col) if start_col is not None else 0
+                result_lines.append(lines[i][start_col_int:])
             elif i == end_line:
                 # Last line
                 end_col = getattr(node, "end_col_offset", len(lines[i]))
-                end_col = int(end_col) if end_col is not None else len(lines[i])
-                result_lines.append(lines[i][:end_col])
+                end_col_int = int(end_col) if end_col is not None else len(lines[i])
+                result_lines.append(lines[i][:end_col_int])
             else:
                 # Middle lines
                 result_lines.append(lines[i])

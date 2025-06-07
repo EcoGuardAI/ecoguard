@@ -174,7 +174,7 @@ class EcoGuardAnalyzer:
             raise FileNotFoundError(f"Directory not found: {directory}")
 
         # Find all Python files
-        python_files = []
+        python_files: List[Path] = []
         for pattern in self.config.include_patterns:
             python_files.extend(directory.rglob(pattern))
 

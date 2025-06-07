@@ -8,7 +8,7 @@ and metadata from analysis runs.
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from ecoguard_ai.core.issue import Category, Issue, Severity
 
@@ -17,11 +17,11 @@ def _matches_severity(issue: Issue, severity: Severity) -> bool:
     """Helper function to safely compare issue severity with target severity."""
     if isinstance(issue.severity, Severity):
         return issue.severity == severity
-    elif isinstance(issue.severity, str):
+    if isinstance(issue.severity, str):
         try:
             return Severity(issue.severity.lower()) == severity
         except ValueError:
-            return False
+            pass
     return False
 
 
@@ -29,11 +29,11 @@ def _matches_category(issue: Issue, category: Category) -> bool:
     """Helper function to safely compare issue category with target category."""
     if isinstance(issue.category, Category):
         return issue.category == category
-    elif isinstance(issue.category, str):
+    if isinstance(issue.category, str):
         try:
             return Category(issue.category.lower()) == category
         except ValueError:
-            return False
+            pass
     return False
 
 
@@ -41,11 +41,11 @@ def _get_severity_enum(issue: Issue) -> Severity:
     """Helper function to get Severity enum from issue."""
     if isinstance(issue.severity, Severity):
         return issue.severity
-    elif isinstance(issue.severity, str):
+    if isinstance(issue.severity, str):
         try:
             return Severity(issue.severity.lower())
         except ValueError:
-            return Severity.INFO
+            pass
     return Severity.INFO
 
 
