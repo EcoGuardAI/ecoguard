@@ -272,11 +272,11 @@ class GreenAnalyzer(BaseAnalyzer):
         )
 
         # Register green software rules
-        self.register_rule(StringConcatenationRule())  # type: ignore
-        self.register_rule(ListComprehensionRule())  # type: ignore
-        self.register_rule(GeneratorExpressionRule())  # type: ignore
-        self.register_rule(FileHandlingRule())  # type: ignore
-        self.register_rule(IneffientLoopRule())  # type: ignore
+        self.register_rule(StringConcatenationRule())
+        self.register_rule(ListComprehensionRule())
+        self.register_rule(GeneratorExpressionRule())
+        self.register_rule(FileHandlingRule())
+        self.register_rule(IneffientLoopRule())
 
     def analyze(self, tree: ast.AST, source_code: str, file_path: str) -> List[Issue]:
         """

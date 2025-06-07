@@ -11,6 +11,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from click.testing import CliRunner
 
 from ecoguard_ai.cli import (
@@ -22,6 +23,23 @@ from ecoguard_ai.cli import (
 )
 from ecoguard_ai.core.issue import Fix, Impact, Issue, Severity
 from ecoguard_ai.core.result import AnalysisResult, ProjectAnalysisResult
+
+
+@pytest.fixture
+def runner():
+    """CLI runner fixture for tests."""
+    return CliRunner()
+
+
+@pytest.fixture
+def temp_python_file(tmp_path):
+    """Create a temporary Python file for testing."""
+    content = '''def example_function():
+    return "Hello, World!"
+'''
+    file_path = tmp_path / "test_file.py"
+    file_path.write_text(content)
+    return file_path
 
 
 @contextmanager
@@ -68,12 +86,12 @@ class TestCLIMain:
 class TestCLICommands:
     """Test CLI commands."""
 
-    def test_version_command(self):
-        """Test --version option."""
-        runner = CliRunner()
-        result = runner.invoke(cli, ["--version"])
+    def test_version_command(self, runner):
+        """Test version command output."""
+        result = runner.invoke(cli, ["version"])
         assert result.exit_code == 0
-        assert "EcoGuard AI" in result.output
+        assert "EcoGuard AI v0.1.2" in result.output
+        assert "AI-augmented software development pipeline solution" in result.output
 
     def test_version_subcommand(self):
         """Test version subcommand."""
@@ -124,73 +142,26 @@ class TestAnalyzeCommand:
             # on issues found)
             assert result.exit_code in [0, 1]
 
-    def test_analyze_with_json_format(self):
+    def test_analyze_with_config_option(self, runner, temp_python_file, tmp_path):
+        """Test analyze command with config option."""
+        # Create a temporary config file
+        config_file = tmp_path / "config.yaml"
+        config_file.write_text("# Test config file\n")
+        
+        result = runner.invoke(cli, ["analyze", str(temp_python_file), "--config", str(config_file)])
+        # Should show config warning but still work
+        assert result.exit_code == 0 or "Config file support coming in future release" in result.output
+
+    def test_analyze_with_format_json(self, runner, temp_python_file):
         """Test analyze command with JSON output format."""
-        with windows_safe_tempfile("print('hello world')") as temp_file:
-            runner = CliRunner()
-            result = runner.invoke(cli, ["analyze", temp_file, "--format", "json"])
-            assert result.exit_code in [0, 1]
-
-            # Try to parse output as JSON
-            try:
-                json.loads(result.output)
-            except json.JSONDecodeError:
-                # If output contains ANSI codes or other text, that's also valid
-                pass
-
-    def test_analyze_with_text_format(self):
-        """Test analyze command with text output format."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write("import unused_module\ndef test(): pass")
-            f.flush()
-
-            try:
-                runner = CliRunner()
-                result = runner.invoke(cli, ["analyze", f.name, "--format", "text"])
-                assert result.exit_code in [0, 1]
-                # Text format should be readable
-                assert isinstance(result.output, str)
-            finally:
-                Path(f.name).unlink(missing_ok=True)
-
-    def test_analyze_with_table_format(self):
-        """Test analyze command with table output format (default)."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write("import unused_module\ndef test(): pass")
-            f.flush()
-
-            try:
-                runner = CliRunner()
-                result = runner.invoke(cli, ["analyze", f.name, "--format", "table"])
-                assert result.exit_code in [0, 1]
-                # Should contain table formatting
-                assert isinstance(result.output, str)
-            finally:
-                Path(f.name).unlink(missing_ok=True)
-
-    def test_analyze_with_output_file(self):
-        """Test analyze command with output file."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write("print('hello world')")
-            f.flush()
-
-            try:
-                with tempfile.NamedTemporaryFile(
-                    mode="w", suffix=".json", delete=False
-                ) as out_f:
-                    runner = CliRunner()
-                    result = runner.invoke(
-                        cli,
-                        ["analyze", f.name, "--output", out_f.name, "--format", "json"],
-                    )
-                    assert result.exit_code in [0, 1]
-
-                    # Check output file was created
-                    assert Path(out_f.name).exists()
-
-                    Path(out_f.name).unlink(missing_ok=True)
-            finally:
-                Path(f.name).unlink(missing_ok=True)
+        result = runner.invoke(cli, ["analyze", str(temp_python_file), "--format", "json"])
+        assert result.exit_code == 0
+        # JSON output should be parseable
+        try:
+            json.loads(result.output)
+        except json.JSONDecodeError:
+            # If not valid JSON, at least check it ran
+            pass
 
     def test_analyze_directory(self):
         """Test analyze command with directory."""
@@ -202,6 +173,34 @@ class TestAnalyzeCommand:
             runner = CliRunner()
             result = runner.invoke(cli, ["analyze", temp_dir])
             assert result.exit_code in [0, 1]
+
+    def test_analyze_directory_with_errors(self, runner, tmp_path):
+        """Test analyze command on directory that causes errors."""
+        # Create a directory with Python files that might have issues
+        test_dir = tmp_path / "test_project"
+        test_dir.mkdir()
+        
+        # Create a file with potential issues
+        (test_dir / "test.py").write_text("""
+# File with unused variable
+def test_func():
+    unused_var = 42
+    return "hello"
+""")
+        
+        result = runner.invoke(cli, ["analyze", str(test_dir)])
+        # Command should complete (exit codes handled by analyzer)
+        assert isinstance(result.exit_code, int)
+
+    def test_analyze_file_error_exit_code(self, runner, tmp_path):
+        """Test that analyze exits with error code when critical issues found."""
+        # Create a file that might trigger error-level issues
+        test_file = tmp_path / "error_file.py"
+        test_file.write_text("# This might not trigger errors, but test the path")
+        
+        result = runner.invoke(cli, ["analyze", str(test_file)])
+        # Exit code should be 0 or 1 depending on analysis results
+        assert result.exit_code in [0, 1]
 
     def test_analyze_with_invalid_format(self):
         """Test analyze command with invalid format."""

@@ -380,3 +380,138 @@ class TestAnalysisResult:
         str_repr = str(result)
         assert "AnalysisResult" in str_repr
         assert "test.py" in str_repr
+
+    def test_helper_functions(self):
+        """Test the private helper functions in result module."""
+        from ecoguard_ai.core.result import _matches_severity, _matches_category, _get_severity_enum
+        from ecoguard_ai.core.issue import Issue, Severity, Category
+
+        # Test _matches_severity
+        issue = Issue(
+            rule_id="test",
+            category="quality",
+            severity="warning",
+            message="Test",
+            file_path="test.py",
+            line=1,
+        )
+
+        assert _matches_severity(issue, Severity.WARNING) is True
+        assert _matches_severity(issue, Severity.ERROR) is False
+
+        # Test with invalid severity string
+        issue_invalid = Issue(
+            rule_id="test",
+            category="quality",
+            severity="invalid_severity",
+            message="Test",
+            file_path="test.py",
+            line=1,
+        )
+        assert _matches_severity(issue_invalid, Severity.WARNING) is False
+
+        # Test _matches_category
+        assert _matches_category(issue, Category.QUALITY) is True
+        assert _matches_category(issue, Category.SECURITY) is False
+
+        # Test with invalid category string
+        issue_invalid_cat = Issue(
+            rule_id="test",
+            category="invalid_category",
+            severity="warning",
+            message="Test",
+            file_path="test.py",
+            line=1,
+        )
+        assert _matches_category(issue_invalid_cat, Category.QUALITY) is False
+
+        # Test _get_severity_enum
+        assert _get_severity_enum(issue) == Severity.WARNING
+        assert _get_severity_enum(issue_invalid) == Severity.INFO  # Default fallback
+
+    def test_analysis_result_filter_edge_cases(self):
+        """Test edge cases in AnalysisResult filtering methods."""
+        from ecoguard_ai.core.issue import Issue, Severity, Category
+        from ecoguard_ai.core.result import AnalysisResult
+
+        # Create result with mixed severity/category types
+        issues = [
+            Issue(
+                rule_id="test1",
+                category="quality",  # String
+                severity=Severity.ERROR,  # Enum
+                message="Test 1",
+                file_path="test.py",
+                line=1,
+            ),
+            Issue(
+                rule_id="test2",
+                category=Category.SECURITY,  # Enum
+                severity="warning",  # String
+                message="Test 2",
+                file_path="test.py",
+                line=2,
+            ),
+        ]
+
+        result = AnalysisResult(file_path="test.py", issues=issues)
+
+        # Test filtering with mixed types
+        error_issues = result.get_issues_by_severity(Severity.ERROR)
+        assert len(error_issues) == 1
+        assert error_issues[0].rule_id == "test1"
+
+        warning_issues = result.get_issues_by_severity(Severity.WARNING)
+        assert len(warning_issues) == 1
+        assert warning_issues[0].rule_id == "test2"
+
+        quality_issues = result.get_issues_by_category(Category.QUALITY)
+        assert len(quality_issues) == 1
+        assert quality_issues[0].rule_id == "test1"
+
+    def test_project_analysis_result_filtering(self):
+        """Test ProjectAnalysisResult filtering capabilities."""
+        from ecoguard_ai.core.issue import Issue, Severity, Category
+        from ecoguard_ai.core.result import AnalysisResult, ProjectAnalysisResult
+
+        # Create multiple file results
+        issues1 = [
+            Issue(
+                rule_id="test1",
+                category=Category.QUALITY,
+                severity=Severity.ERROR,
+                message="Error in file 1",
+                file_path="file1.py",
+                line=1,
+            )
+        ]
+
+        issues2 = [
+            Issue(
+                rule_id="test2",
+                category=Category.SECURITY,
+                severity=Severity.WARNING,
+                message="Warning in file 2",
+                file_path="file2.py",
+                line=1,
+            )
+        ]
+
+        result1 = AnalysisResult(file_path="file1.py", issues=issues1)
+        result2 = AnalysisResult(file_path="file2.py", issues=issues2)
+
+        project_result = ProjectAnalysisResult(
+            project_path="/test/project",
+            file_results=[result1, result2],
+        )
+
+        # Test has_errors
+        assert project_result.has_errors() is True  # Has ERROR severity
+
+        # Test get_all_issues
+        all_issues = project_result.get_all_issues()
+        assert len(all_issues) == 2
+
+        # Test filtering across all files
+        error_issues = [issue for issue in all_issues if issue.severity == Severity.ERROR]
+        assert len(error_issues) == 1

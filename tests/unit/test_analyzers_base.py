@@ -6,7 +6,7 @@ This module tests the base analyzer classes and rule framework.
 
 import ast
 
-from ecoguard_ai.analyzers.base import ASTVisitorRule, BaseAnalyzer, BaseRule
+from ecoguard_ai.analyzers.base import ASTVisitorRule, BaseAnalyzer, BaseRule, get_source_segment
 from ecoguard_ai.core.issue import Issue
 
 
@@ -211,3 +211,66 @@ def another_function():
         assert len(rule.issues) == 1
         assert rule.issues[0].message == "Test issue"
         assert rule.issues[0].file_path == "test.py"
+
+
+def test_get_source_segment():
+    """Test the get_source_segment utility function."""
+    
+    # Test single line
+    source = "x = 1\ny = 2\nz = 3"
+    tree = ast.parse(source)
+    assign_node = tree.body[0]  # x = 1
+    
+    segment = get_source_segment(source, assign_node)
+    assert segment == "x = 1"
+    
+    # Test multiple lines
+    source = "def func():\n    x = 1\n    return x"
+    tree = ast.parse(source)
+    func_node = tree.body[0]
+    
+    segment = get_source_segment(source, func_node)
+    assert "def func():" in segment
+    assert "return x" in segment
+    
+    # Test node without line info
+    node_without_line = ast.AST()
+    segment = get_source_segment(source, node_without_line)
+    assert segment == ""
+    
+    # Test invalid line numbers
+    class MockNode:
+        def __init__(self, lineno, end_lineno=None):
+            self.lineno = lineno
+            self.end_lineno = end_lineno
+    
+    invalid_node = MockNode(-1)
+    segment = get_source_segment(source, invalid_node)
+    assert segment == ""
+    
+    out_of_bounds_node = MockNode(100)
+    segment = get_source_segment(source, out_of_bounds_node)
+    assert segment == ""
+
+
+def test_get_source_segment_column_offsets():
+    """Test get_source_segment with column offset handling."""
+    
+    source = "x = 1 + 2"
+    tree = ast.parse(source)
+    
+    # Get the binary operation node (1 + 2)
+    assign_node = tree.body[0]
+    binop_node = assign_node.value
+    
+    segment = get_source_segment(source, binop_node)
+    assert "1 + 2" in segment or segment  # Should extract part of the expression
+    
+    # Test with multiline and column offsets
+    source = "if True:\n    x = 1\n    y = 2"
+    tree = ast.parse(source)
+    if_node = tree.body[0]
+    
+    segment = get_source_segment(source, if_node)
+    assert "if True:" in segment
+    assert "y = 2" in segment

@@ -14,7 +14,7 @@ from rich.table import Table
 from rich.text import Text
 
 from ecoguard_ai.core.analyzer import AnalysisConfig, EcoGuardAnalyzer
-from ecoguard_ai.core.issue import Severity
+from ecoguard_ai.core.issue import Category, Severity
 from ecoguard_ai.core.result import AnalysisResult, ProjectAnalysisResult
 
 console = Console()
@@ -350,7 +350,7 @@ def _get_severity_color(severity: Severity) -> str:
 
 def main() -> None:
     """Main entry point for the CLI."""
-    cli()  # type: ignore
+    cli()
 
 
 if __name__ == "__main__":

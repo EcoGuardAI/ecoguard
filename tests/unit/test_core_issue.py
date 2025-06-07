@@ -243,3 +243,77 @@ class TestIssue:
 
         expected = "test.py:10:5: warning: Test message [test_rule]"
         assert str(issue) == expected
+
+    def test_issue_with_invalid_severity(self):
+        """Test Issue creation with invalid severity string."""
+        issue = Issue(
+            rule_id="test_rule",
+            category="quality",
+            severity="invalid_severity",  # This should default to INFO
+            message="Test message",
+            file_path="test.py",
+            line=1,
+        )
+        assert issue.severity == Severity.INFO
+
+    def test_issue_with_invalid_category(self):
+        """Test Issue creation with invalid category string."""
+        issue = Issue(
+            rule_id="test_rule",
+            category="invalid_category",  # This should default to SYSTEM
+            severity="warning",
+            message="Test message",
+            file_path="test.py",
+            line=1,
+        )
+        assert issue.category == Category.SYSTEM
+
+    def test_severity_score_with_string_severity(self):
+        """Test severity_score property with string severity."""
+        issue = Issue(
+            rule_id="test_rule",
+            category="quality",
+            severity="critical",  # String that should convert to enum
+            message="Test message",
+            file_path="test.py",
+            line=1,
+        )
+
+        # Should convert string to enum and return correct score
+        assert issue.severity_score == 5  # CRITICAL = 5
+
+    def test_severity_score_with_invalid_string(self):
+        """Test severity_score with invalid string severity."""
+        issue = Issue(
+            rule_id="test_rule",
+            category="quality",
+            severity="invalid",
+            message="Test message",
+            file_path="test.py",
+            line=1,
+        )
+
+        # Should handle gracefully and return reasonable score
+        assert isinstance(issue.severity_score, int)
+
+    def test_severity_score_with_none(self):
+        """Test severity_score when severity is None or missing."""
+        # Create issue and manually set severity to None to test edge case
+        issue = Issue(
+            rule_id="test_rule",
+            category="quality",
+            severity="info",
+            message="Test message",
+            file_path="test.py",
+            line=1,
+        )
+
+        # Temporarily set to None to test the fallback
+        old_severity = issue.severity
+        issue.severity = None
+
+        try:
+            score = issue.severity_score
+            assert score == 0  # Should return 0 for None/invalid
+        finally:
+            issue.severity = old_severity

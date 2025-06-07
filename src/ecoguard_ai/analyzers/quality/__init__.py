@@ -252,8 +252,8 @@ class QualityAnalyzer(BaseAnalyzer):
         )
 
         # Register quality rules
-        self.register_rule(UnusedVariableRule())  # type: ignore
-        self.register_rule(UnusedImportRule())  # type: ignore
+        self.register_rule(UnusedVariableRule())
+        self.register_rule(UnusedImportRule())
         self.register_rule(FunctionComplexityRule())
         self.register_rule(LongParameterListRule())
 

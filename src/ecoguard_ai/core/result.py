@@ -293,6 +293,17 @@ class ProjectAnalysisResult:
         scores = [result.calculate_security_score() for result in self.file_results]
         return sum(scores) / len(scores)
 
+    def has_errors(self) -> bool:
+        """Check if the project has any error-level or critical issues."""
+        for result in self.file_results:
+            if result.error_count > 0 or result.critical_count > 0:
+                return True
+        return False
+
+    def get_all_issues(self) -> List[Issue]:
+        """Get all issues from all files (same as all_issues property but as method)."""
+        return self.all_issues
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert project result to dictionary representation."""
         return {

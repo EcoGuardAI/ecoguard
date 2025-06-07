@@ -339,11 +339,11 @@ class AICodeAnalyzer(BaseAnalyzer):
         )
 
         # Register AI-specific rules
-        self.register_rule(VerboseCodeRule())  # type: ignore
-        self.register_rule(RedundantVariableRule())  # type: ignore
-        self.register_rule(DuplicateFunctionRule())  # type: ignore
-        self.register_rule(OverCommentedCodeRule())  # type: ignore
-        self.register_rule(UnnecessaryTypeChecksRule())  # type: ignore
+        self.register_rule(VerboseCodeRule())
+        self.register_rule(RedundantVariableRule())
+        self.register_rule(DuplicateFunctionRule())
+        self.register_rule(OverCommentedCodeRule())
+        self.register_rule(UnnecessaryTypeChecksRule())
 
     def analyze(self, tree: ast.AST, source_code: str, file_path: str) -> List[Issue]:
         """

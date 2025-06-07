@@ -213,20 +213,22 @@ def get_source_segment(source_code: str, node: ast.AST) -> str:
         # Single line
         line = lines[start_line]
         start_col: int = int(getattr(node, "col_offset", 0))
-        end_col: int = int(getattr(node, "end_col_offset", len(line)))
-        return line[start_col:end_col]
+        end_col_attr = getattr(node, "end_col_offset", len(line))
+        end_col: int = int(end_col_attr) if end_col_attr is not None else len(line)
+        return str(line[start_col:end_col])
     else:
         # Multiple lines
         result_lines = []
         for i in range(start_line, min(end_line + 1, len(lines))):
             if i == start_line:
                 # First line
-                start_col: int = int(getattr(node, "col_offset", 0))
-                result_lines.append(lines[i][start_col:])
+                line_start_col: int = int(getattr(node, "col_offset", 0))
+                result_lines.append(lines[i][line_start_col:])
             elif i == end_line:
                 # Last line
-                end_col: int = int(getattr(node, "end_col_offset", len(lines[i])))
-                result_lines.append(lines[i][:end_col])
+                end_col_attr = getattr(node, "end_col_offset", len(lines[i]))
+                line_end_col: int = int(end_col_attr) if end_col_attr is not None else len(lines[i])
+                result_lines.append(lines[i][:line_end_col])
             else:
                 # Middle lines
                 result_lines.append(lines[i])
