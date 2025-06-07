@@ -212,26 +212,21 @@ def get_source_segment(source_code: str, node: ast.AST) -> str:
     if start_line == end_line:
         # Single line
         line = lines[start_line]
-        start_col = getattr(node, "col_offset", 0)
-        end_col = getattr(node, "end_col_offset", len(line))
-        # Ensure proper types for slicing
-        start_col_int = int(start_col) if start_col is not None else 0
-        end_col_int = int(end_col) if end_col is not None else len(line)
-        return line[start_col_int:end_col_int]
+        start_col: int = int(getattr(node, "col_offset", 0))
+        end_col: int = int(getattr(node, "end_col_offset", len(line)))
+        return line[start_col:end_col]
     else:
         # Multiple lines
         result_lines = []
         for i in range(start_line, min(end_line + 1, len(lines))):
             if i == start_line:
                 # First line
-                start_col = getattr(node, "col_offset", 0)
-                start_col_int = int(start_col) if start_col is not None else 0
-                result_lines.append(lines[i][start_col_int:])
+                start_col: int = int(getattr(node, "col_offset", 0))
+                result_lines.append(lines[i][start_col:])
             elif i == end_line:
                 # Last line
-                end_col = getattr(node, "end_col_offset", len(lines[i]))
-                end_col_int = int(end_col) if end_col is not None else len(lines[i])
-                result_lines.append(lines[i][:end_col_int])
+                end_col: int = int(getattr(node, "end_col_offset", len(lines[i])))
+                result_lines.append(lines[i][:end_col])
             else:
                 # Middle lines
                 result_lines.append(lines[i])

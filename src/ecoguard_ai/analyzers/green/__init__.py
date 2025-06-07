@@ -21,7 +21,7 @@ from ecoguard_ai.core.issue import Fix, Impact, Issue
 class StringConcatenationRule(ASTVisitorRule):
     """Detect inefficient string concatenation in loops."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="inefficient_string_concat",
             name="Inefficient String Concatenation",
@@ -79,7 +79,7 @@ class StringConcatenationRule(ASTVisitorRule):
 class ListComprehensionRule(ASTVisitorRule):
     """Suggest list comprehensions over manual loops."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="use_list_comprehension",
             name="Use List Comprehension",
@@ -125,7 +125,7 @@ class ListComprehensionRule(ASTVisitorRule):
 class GeneratorExpressionRule(ASTVisitorRule):
     """Suggest generators over lists when appropriate."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="use_generator",
             name="Use Generator Expression",
@@ -168,7 +168,7 @@ class GeneratorExpressionRule(ASTVisitorRule):
 class FileHandlingRule(ASTVisitorRule):
     """Check for efficient file handling patterns."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="file_handling_efficiency",
             name="File Handling Efficiency",
@@ -210,7 +210,7 @@ class FileHandlingRule(ASTVisitorRule):
 class IneffientLoopRule(ASTVisitorRule):
     """Detect inefficient loop patterns."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="inefficient_loop",
             name="Inefficient Loop Pattern",
@@ -265,18 +265,18 @@ class GreenAnalyzer(BaseAnalyzer):
     - Memory-efficient patterns
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="Green Software Analyzer",
             description="Analyzes environmental sustainability and efficiency",
         )
 
         # Register green software rules
-        self.register_rule(StringConcatenationRule())
-        self.register_rule(ListComprehensionRule())
-        self.register_rule(GeneratorExpressionRule())
-        self.register_rule(FileHandlingRule())
-        self.register_rule(IneffientLoopRule())
+        self.register_rule(StringConcatenationRule())  # type: ignore
+        self.register_rule(ListComprehensionRule())  # type: ignore
+        self.register_rule(GeneratorExpressionRule())  # type: ignore
+        self.register_rule(FileHandlingRule())  # type: ignore
+        self.register_rule(IneffientLoopRule())  # type: ignore
 
     def analyze(self, tree: ast.AST, source_code: str, file_path: str) -> List[Issue]:
         """

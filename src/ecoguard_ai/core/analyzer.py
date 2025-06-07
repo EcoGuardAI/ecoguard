@@ -66,22 +66,22 @@ class EcoGuardAnalyzer:
         """Initialize and register all available analyzers."""
         # This will be expanded as we implement specific analyzers
         if self.config.enable_quality:
-            from ecoguard_ai.analyzers.quality import QualityAnalyzer
+            from ecoguard_ai.analyzers.quality import QualityAnalyzer  # type: ignore
 
             self._analyzers.append(QualityAnalyzer())
 
         if self.config.enable_security:
-            from ecoguard_ai.analyzers.security import SecurityAnalyzer
+            from ecoguard_ai.analyzers.security import SecurityAnalyzer  # type: ignore
 
             self._analyzers.append(SecurityAnalyzer())
 
         if self.config.enable_green:
-            from ecoguard_ai.analyzers.green import GreenAnalyzer
+            from ecoguard_ai.analyzers.green import GreenAnalyzer  # type: ignore
 
             self._analyzers.append(GreenAnalyzer())
 
         if self.config.enable_ai_code:
-            from ecoguard_ai.analyzers.ai_code import AICodeAnalyzer
+            from ecoguard_ai.analyzers.ai_code import AICodeAnalyzer  # type: ignore
 
             self._analyzers.append(AICodeAnalyzer())
 

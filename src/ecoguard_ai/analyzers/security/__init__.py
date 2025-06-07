@@ -25,7 +25,7 @@ class SecurityAnalyzer(BaseAnalyzer):
     Currently a placeholder - will be implemented in Stage 2.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="Security Analyzer",
             description="Analyzes security vulnerabilities and risks",

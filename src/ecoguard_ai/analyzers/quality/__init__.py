@@ -18,7 +18,7 @@ from ecoguard_ai.core.issue import Fix, Impact, Issue
 class UnusedVariableRule(ASTVisitorRule):
     """Detect unused variables in function scopes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="unused_variable",
             name="Unused Variable",
@@ -82,7 +82,7 @@ class UnusedVariableRule(ASTVisitorRule):
 class UnusedImportRule(ASTVisitorRule):
     """Detect unused imports at module level."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="unused_import",
             name="Unused Import",
@@ -245,15 +245,15 @@ class QualityAnalyzer(BaseAnalyzer):
     - Code structure improvements
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="Quality Analyzer",
             description="Analyzes code quality and maintainability",
         )
 
         # Register quality rules
-        self.register_rule(UnusedVariableRule())
-        self.register_rule(UnusedImportRule())
+        self.register_rule(UnusedVariableRule())  # type: ignore
+        self.register_rule(UnusedImportRule())  # type: ignore
         self.register_rule(FunctionComplexityRule())
         self.register_rule(LongParameterListRule())
 

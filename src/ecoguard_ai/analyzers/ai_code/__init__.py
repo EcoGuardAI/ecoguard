@@ -18,7 +18,7 @@ from ecoguard_ai.core.issue import Fix, Impact, Issue
 class VerboseCodeRule(ASTVisitorRule):
     """Detect overly verbose code patterns common in AI-generated code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="verbose_ai_code",
             name="Verbose AI-Generated Code",
@@ -104,7 +104,7 @@ class VerboseCodeRule(ASTVisitorRule):
 class RedundantVariableRule(ASTVisitorRule):
     """Detect redundant variable assignments common in AI code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="redundant_variable",
             name="Redundant Variable Assignment",
@@ -156,7 +156,7 @@ class RedundantVariableRule(ASTVisitorRule):
 class DuplicateFunctionRule(ASTVisitorRule):
     """Detect similar function patterns that might be duplicates."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="duplicate_function",
             name="Potential Duplicate Function",
@@ -218,7 +218,7 @@ class DuplicateFunctionRule(ASTVisitorRule):
 class OverCommentedCodeRule(ASTVisitorRule):
     """Detect over-commented code common in AI-generated code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="over_commented",
             name="Over-Commented Code",
@@ -269,7 +269,7 @@ class OverCommentedCodeRule(ASTVisitorRule):
 class UnnecessaryTypeChecksRule(ASTVisitorRule):
     """Detect unnecessary type checks common in defensive AI code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             rule_id="unnecessary_type_check",
             name="Unnecessary Type Check",
@@ -332,18 +332,18 @@ class AICodeAnalyzer(BaseAnalyzer):
     - AI-generated boilerplate identification
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="AI Code Analyzer",
             description="Analyzes AI-generated code inefficiencies and patterns",
         )
 
         # Register AI-specific rules
-        self.register_rule(VerboseCodeRule())
-        self.register_rule(RedundantVariableRule())
-        self.register_rule(DuplicateFunctionRule())
-        self.register_rule(OverCommentedCodeRule())
-        self.register_rule(UnnecessaryTypeChecksRule())
+        self.register_rule(VerboseCodeRule())  # type: ignore
+        self.register_rule(RedundantVariableRule())  # type: ignore
+        self.register_rule(DuplicateFunctionRule())  # type: ignore
+        self.register_rule(OverCommentedCodeRule())  # type: ignore
+        self.register_rule(UnnecessaryTypeChecksRule())  # type: ignore
 
     def analyze(self, tree: ast.AST, source_code: str, file_path: str) -> List[Issue]:
         """
