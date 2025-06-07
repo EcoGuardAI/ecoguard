@@ -6,16 +6,10 @@ This module tests the quality-specific analysis rules.
 
 import ast
 
-import pytest
 
 from ecoguard_ai.analyzers.quality import (
     QualityAnalyzer,
-    UnusedImportRule,
-    UnusedVariableRule,
-    LongParameterListRule,
-    FunctionComplexityRule
 )
-from ecoguard_ai.core.issue import Severity, Category
 
 
 class TestQualityAnalyzer:
@@ -29,7 +23,7 @@ class TestQualityAnalyzer:
         """Test QualityAnalyzer initialization."""
         assert self.analyzer.name == "Quality Analyzer"
         assert len(self.analyzer.rules) > 0
-        
+
         # Check that specific rules are registered
         assert "unused_import" in self.analyzer.rules
         assert "unused_variable" in self.analyzer.rules
@@ -46,7 +40,7 @@ def greet(name):
 result = greet("World")
 print(result)
 '''
-        
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
         # Should have minimal or no issues
@@ -54,7 +48,7 @@ print(result)
 
     def test_analyze_code_with_issues(self):
         """Test analyzing code with quality issues."""
-        code = '''
+        code = """
 import os
 import sys
 import unused_module
@@ -62,12 +56,12 @@ import unused_module
 def complex_function(a, b, c, d, e, f, g):
     unused_var = 42
     return a + b + c + d + e + f + g
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
         assert len(issues) > 0
-        
+
         # Check for specific issue types
         rule_ids = [issue.rule_id for issue in issues]
         assert "unused_import" in rule_ids
@@ -91,21 +85,21 @@ class TestUnusedImportRule:
 
     def test_detect_unused_import(self):
         """Test detecting unused imports."""
-        code = '''
+        code = """
 import os
 import sys
 import unused_module
 
 print("Hello world")
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused import issues
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         assert len(unused_import_issues) == 3  # All three imports are unused
-        
+
         # Check that all issues are for unused imports
         for issue in unused_import_issues:
             assert issue.rule_id == "unused_import"
@@ -113,48 +107,48 @@ print("Hello world")
 
     def test_detect_used_import(self):
         """Test that used imports are not flagged."""
-        code = '''
+        code = """
 import os
 import sys
 
 print(os.getcwd())
 sys.exit(0)
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused import issues - should be none
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         assert len(unused_import_issues) == 0
 
     def test_detect_from_import_unused(self):
         """Test detecting unused from imports."""
-        code = '''
+        code = """
 from os import path, getcwd
 from sys import exit
 
 print("Hello world")
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused import issues
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         assert len(unused_import_issues) > 0  # All imports are unused
 
     def test_detect_from_import_partial_use(self):
         """Test detecting partially used from imports."""
-        code = '''
+        code = """
 from os import path, getcwd
 
 print(getcwd())  # Only getcwd is used
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused import issues
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         # Should detect unused 'path' import
@@ -165,32 +159,32 @@ print(getcwd())  # Only getcwd is used
 
     def test_import_alias_unused(self):
         """Test detecting unused import aliases."""
-        code = '''
+        code = """
 import numpy as np
 import pandas as pd
 
 print("Hello world")
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused import issues
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         assert len(unused_import_issues) == 2
 
     def test_import_alias_used(self):
         """Test that used import aliases are not flagged."""
-        code = '''
+        code = """
 import numpy as np
 
 arr = np.array([1, 2, 3])
 print(arr)
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused import issues - should be none
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         assert len(unused_import_issues) == 0
@@ -212,16 +206,16 @@ class TestUnusedVariableRule:
 
     def test_detect_unused_variable(self):
         """Test detecting unused variables."""
-        code = '''
+        code = """
 def test_function():
     used_var = 42
     unused_var = 24
     return used_var
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused variable issues
         unused_var_issues = [i for i in issues if i.rule_id == "unused_variable"]
         assert len(unused_var_issues) >= 1
@@ -231,7 +225,7 @@ def test_function():
 
     def test_detect_multiple_unused_variables(self):
         """Test detecting multiple unused variables."""
-        code = '''
+        code = """
 def test_function():
     a = 1
     b = 2
@@ -239,11 +233,11 @@ def test_function():
     unused1 = 4
     unused2 = 5
     return a + b + c
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused variable issues
         unused_var_issues = [i for i in issues if i.rule_id == "unused_variable"]
         assert len(unused_var_issues) >= 2
@@ -253,25 +247,26 @@ def test_function():
 
     def test_ignore_underscore_variables(self):
         """Test that underscore variables are ignored."""
-        code = '''
+        code = """
 def test_function():
     _ = some_function()
     _temp = another_function()
     used_var = 42
     return used_var
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
-        # Filter for unused variable issues - should be none since underscore vars are ignored
+
+        # Filter for unused variable issues - should be none since underscore vars
+        # are ignored
         unused_var_issues = [i for i in issues if i.rule_id == "unused_variable"]
         # Should not flag underscore variables
         assert len(unused_var_issues) == 0
 
     def test_variable_used_in_nested_scope(self):
         """Test that variables used in nested scopes are not flagged."""
-        code = '''
+        code = """
 def outer_function():
     outer_var = 42
 
@@ -279,17 +274,19 @@ def outer_function():
         return outer_var
 
     return inner_function()
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for unused variable issues
         unused_var_issues = [i for i in issues if i.rule_id == "unused_variable"]
         # Note: Current implementation has a limitation with nested scopes
         # The variable is flagged as unused even though it's used in nested function
         # This is a known limitation - we test the current behavior
-        assert len(unused_var_issues) == 1  # Current behavior: outer_var flagged as unused
+        assert (
+            len(unused_var_issues) == 1
+        )  # Current behavior: outer_var flagged as unused
         assert "outer_var" in unused_var_issues[0].message
 
 
@@ -309,14 +306,14 @@ class TestLongParameterListRule:
 
     def test_detect_too_many_parameters(self):
         """Test detecting functions with too many parameters."""
-        code = '''
+        code = """
 def complex_function(a, b, c, d, e, f, g):
     return a + b + c + d + e + f + g
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for long parameter list issues
         param_issues = [i for i in issues if i.rule_id == "too_many_params"]
         assert len(param_issues) >= 1
@@ -325,46 +322,46 @@ def complex_function(a, b, c, d, e, f, g):
 
     def test_function_with_acceptable_parameters(self):
         """Test that functions with acceptable parameter count are not flagged."""
-        code = '''
+        code = """
 def simple_function(a, b, c):
     return a + b + c
 
 def another_function(x, y, z, w, v):
     return x + y + z + w + v
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for long parameter list issues - should be none
         param_issues = [i for i in issues if i.rule_id == "too_many_params"]
         assert len(param_issues) == 0
 
     def test_method_with_self_parameter(self):
         """Test that self parameter is counted correctly."""
-        code = '''
+        code = """
 class TestClass:
     def method_with_many_params(self, a, b, c, d, e, f):
         return a + b + c + d + e + f
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for long parameter list issues
         param_issues = [i for i in issues if i.rule_id == "too_many_params"]
         assert len(param_issues) >= 1  # 7 parameters including self
 
     def test_function_with_default_parameters(self):
         """Test functions with default parameters."""
-        code = '''
+        code = """
 def function_with_defaults(a, b, c=1, d=2, e=3, f=4):
     return a + b + c + d + e + f
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for long parameter list issues
         param_issues = [i for i in issues if i.rule_id == "too_many_params"]
         assert len(param_issues) >= 1  # Still 6 parameters
@@ -387,7 +384,7 @@ class TestFunctionComplexityRule:
     def test_detect_complex_function(self):
         """Test detecting functions with high complexity."""
         # Create a function with many decision points (complexity > 10)
-        code = '''
+        code = """
 def complex_function(x, y, z):
     if x > 0:
         if y > 0:
@@ -408,11 +405,11 @@ def complex_function(x, y, z):
                                     if j > 0:
                                         break
     return x + y + z
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for function complexity issues
         complexity_issues = [i for i in issues if i.rule_id == "function_complexity"]
         assert len(complexity_issues) >= 1
@@ -420,54 +417,54 @@ def complex_function(x, y, z):
 
     def test_simple_function_not_flagged(self):
         """Test that simple functions are not flagged."""
-        code = '''
+        code = """
 def simple_function():
     x = 1
     y = 2
     return x + y
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for function complexity issues - should be none
         complexity_issues = [i for i in issues if i.rule_id == "function_complexity"]
         assert len(complexity_issues) == 0
 
     def test_function_with_moderate_complexity(self):
         """Test function with moderate complexity."""
-        code = '''
+        code = """
 def moderate_function(x):
     if x > 0:
         return x * 2
     else:
         return x / 2
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for function complexity issues - should not exceed threshold
         complexity_issues = [i for i in issues if i.rule_id == "function_complexity"]
         assert len(complexity_issues) == 0
 
     def test_empty_function(self):
         """Test empty function handling."""
-        code = '''
+        code = """
 def empty_function():
     pass
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for function complexity issues - should be none
         complexity_issues = [i for i in issues if i.rule_id == "function_complexity"]
         assert len(complexity_issues) == 0
 
     def test_method_complexity(self):
         """Test method complexity detection in classes."""
-        code = '''
+        code = """
 class TestClass:
     def complex_method(self, data):
         for item in data:
@@ -488,11 +485,11 @@ class TestClass:
                                     else:
                                         continue
         return data
-'''
-        
+"""
+
         tree = ast.parse(code)
         issues = self.analyzer.analyze(tree, code, "test.py")
-        
+
         # Filter for function complexity issues
         complexity_issues = [i for i in issues if i.rule_id == "function_complexity"]
         assert len(complexity_issues) >= 1

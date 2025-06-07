@@ -5,14 +5,11 @@ This module tests the AnalysisResult class and related functionality.
 """
 
 import json
-import tempfile
 from datetime import datetime
-from pathlib import Path
 
-import pytest
 
-from ecoguard_ai.core.issue import Category, Fix, Impact, Issue, Severity
-from ecoguard_ai.core.result import AnalysisResult, ProjectAnalysisResult
+from ecoguard_ai.core.issue import Category, Impact, Issue, Severity
+from ecoguard_ai.core.result import AnalysisResult
 
 
 class TestAnalysisResult:
@@ -61,10 +58,7 @@ class TestAnalysisResult:
 
     def test_initialization_with_issues(self):
         """Test AnalysisResult initialization with issues."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
         assert result.file_path == "test.py"
         assert len(result.issues) == 3
@@ -80,10 +74,10 @@ class TestAnalysisResult:
             severity=Severity.ERROR,
             category=Category.QUALITY,
             file_path="test.py",
-            line=1
+            line=1,
         )
 
-        # Since AnalysisResult doesn't have add_issue method, 
+        # Since AnalysisResult doesn't have add_issue method,
         # we test direct issue list manipulation
         result.issues.append(issue)
         assert len(result.issues) == 1
@@ -91,19 +85,13 @@ class TestAnalysisResult:
 
     def test_issue_count_property(self):
         """Test issue count property."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
         assert result.issue_count == 3
 
     def test_get_issues_by_severity(self):
         """Test getting issues by severity."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
         critical_issues = result.get_issues_by_severity(Severity.CRITICAL)
         assert len(critical_issues) == 1
@@ -119,10 +107,7 @@ class TestAnalysisResult:
 
     def test_get_issues_by_category(self):
         """Test getting issues by category."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
         quality_issues = result.get_issues_by_category(Category.QUALITY)
         assert len(quality_issues) == 1
@@ -138,10 +123,7 @@ class TestAnalysisResult:
 
     def test_get_issues_by_rule(self):
         """Test getting issues by rule ID."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
         unused_var_issues = result.get_issues_by_rule("unused_variable")
         assert len(unused_var_issues) == 1
@@ -149,10 +131,7 @@ class TestAnalysisResult:
 
     def test_severity_count_properties(self):
         """Test severity count properties."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
         assert result.critical_count == 1
         assert result.error_count == 0
@@ -172,17 +151,14 @@ class TestAnalysisResult:
             severity=Severity.WARNING,
             category=Category.QUALITY,
             file_path="test.py",
-            line=1
+            line=1,
         )
         no_green_result = AnalysisResult(file_path="test.py", issues=[quality_issue])
         assert no_green_result.calculate_green_score() == 100.0
 
         # Test with green issues
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
-        
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
+
         score = result.calculate_security_score()
         assert isinstance(score, float)
         assert 0 <= score <= 100
@@ -197,14 +173,11 @@ class TestAnalysisResult:
             severity=Severity.ERROR,
             category=Category.GREEN,
             file_path="test.py",
-            line=1
+            line=1,
         )
-        
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=[error_green_issue]
-        )
-        
+
+        result = AnalysisResult(file_path="test.py", issues=[error_green_issue])
+
         score = result.calculate_green_score()
         assert score == 85.0  # 100 - 15 penalty for ERROR level
 
@@ -216,14 +189,11 @@ class TestAnalysisResult:
             severity=Severity.INFO,
             category=Category.GREEN,
             file_path="test.py",
-            line=1
+            line=1,
         )
-        
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=[info_green_issue]
-        )
-        
+
+        result = AnalysisResult(file_path="test.py", issues=[info_green_issue])
+
         score = result.calculate_green_score()
         assert score == 95.0  # 100 - 5 penalty for INFO level
 
@@ -235,14 +205,11 @@ class TestAnalysisResult:
             severity=Severity.ERROR,
             category=Category.SECURITY,
             file_path="test.py",
-            line=1
+            line=1,
         )
-        
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=[error_security_issue]
-        )
-        
+
+        result = AnalysisResult(file_path="test.py", issues=[error_security_issue])
+
         score = result.calculate_security_score()
         assert score == 80.0  # 100 - 20 penalty for ERROR level
 
@@ -254,14 +221,11 @@ class TestAnalysisResult:
             severity=Severity.WARNING,
             category=Category.SECURITY,
             file_path="test.py",
-            line=1
+            line=1,
         )
-        
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=[warning_security_issue]
-        )
-        
+
+        result = AnalysisResult(file_path="test.py", issues=[warning_security_issue])
+
         score = result.calculate_security_score()
         assert score == 90.0  # 100 - 10 penalty for WARNING level
 
@@ -273,103 +237,83 @@ class TestAnalysisResult:
             severity=Severity.INFO,
             category=Category.SECURITY,
             file_path="test.py",
-            line=1
+            line=1,
         )
-        
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=[info_security_issue]
-        )
-        
+
+        result = AnalysisResult(file_path="test.py", issues=[info_security_issue])
+
         score = result.calculate_security_score()
         assert score == 97.0  # 100 - 3 penalty for INFO level
 
     def test_to_dict(self):
         """Test converting result to dictionary."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
-        
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
+
         data = result.to_dict()
         assert isinstance(data, dict)
-        assert 'file_path' in data
-        assert 'analysis_time' in data
-        assert 'summary' in data
-        assert 'issues' in data
-        
-        assert data['file_path'] == "test.py"
-        assert len(data['issues']) == 3
-        assert data['summary']['total_issues'] == 3
+        assert "file_path" in data
+        assert "analysis_time" in data
+        assert "summary" in data
+        assert "issues" in data
+
+        assert data["file_path"] == "test.py"
+        assert len(data["issues"]) == 3
+        assert data["summary"]["total_issues"] == 3
 
     def test_to_dict_with_metadata(self):
         """Test to_dict method includes metadata."""
         metadata = {"test_key": "test_value", "analyzer_version": "1.0.0"}
         result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues,
-            metadata=metadata
+            file_path="test.py", issues=self.sample_issues, metadata=metadata
         )
-        
+
         data = result.to_dict()
         assert "metadata" in data
         assert data["metadata"] == metadata
 
     def test_to_json(self):
         """Test converting result to JSON."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
-        
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
+
         json_str = result.to_json()
         assert isinstance(json_str, str)
-        
+
         # Should be valid JSON
         data = json.loads(json_str)
-        assert 'file_path' in data
-        assert 'summary' in data
-        assert 'issues' in data
+        assert "file_path" in data
+        assert "summary" in data
+        assert "issues" in data
 
     def test_to_json_with_indent(self):
         """Test converting result to formatted JSON."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
-        
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
+
         json_str = result.to_json(indent=2)
         assert isinstance(json_str, str)
-        assert '\n' in json_str  # Should be formatted
-        
+        assert "\n" in json_str  # Should be formatted
+
         # Should be valid JSON
         data = json.loads(json_str)
-        assert data['file_path'] == "test.py"
+        assert data["file_path"] == "test.py"
 
     def test_from_dict(self):
         """Test creating result from dictionary."""
-        original_result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
-        
+        original_result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
+
         data = original_result.to_dict()
         restored_result = AnalysisResult.from_dict(data)
-        
+
         assert restored_result.file_path == original_result.file_path
         assert len(restored_result.issues) == len(original_result.issues)
         assert restored_result.issue_count == original_result.issue_count
 
     def test_from_json(self):
         """Test creating result from JSON."""
-        original_result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
-        
+        original_result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
+
         json_str = original_result.to_json()
         restored_result = AnalysisResult.from_json(json_str)
-        
+
         assert restored_result.file_path == original_result.file_path
         assert len(restored_result.issues) == len(original_result.issues)
         assert restored_result.issue_count == original_result.issue_count
@@ -377,7 +321,7 @@ class TestAnalysisResult:
     def test_empty_result(self):
         """Test result with no issues."""
         result = AnalysisResult(file_path="test.py")
-        
+
         assert result.issue_count == 0
         assert result.calculate_green_score() == 100.0
         assert result.calculate_security_score() == 100.0
@@ -391,7 +335,7 @@ class TestAnalysisResult:
                 severity=Severity.CRITICAL,
                 category=Category.SECURITY,
                 file_path="test.py",
-                line=1
+                line=1,
             ),
             Issue(
                 rule_id="error_issue",
@@ -399,7 +343,7 @@ class TestAnalysisResult:
                 severity=Severity.ERROR,
                 category=Category.QUALITY,
                 file_path="test.py",
-                line=2
+                line=2,
             ),
             Issue(
                 rule_id="warning_issue",
@@ -407,7 +351,7 @@ class TestAnalysisResult:
                 severity=Severity.WARNING,
                 category=Category.GREEN,
                 file_path="test.py",
-                line=3
+                line=3,
             ),
             Issue(
                 rule_id="info_issue",
@@ -415,31 +359,25 @@ class TestAnalysisResult:
                 severity=Severity.INFO,
                 category=Category.AI_CODE,
                 file_path="test.py",
-                line=4
-            )
+                line=4,
+            ),
         ]
-        
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=mixed_issues
-        )
-        
+
+        result = AnalysisResult(file_path="test.py", issues=mixed_issues)
+
         assert result.critical_count == 1
         assert result.error_count == 1
         assert result.warning_count == 1
         assert result.info_count == 1
-        
+
         # Scores should be reduced due to issues
         assert result.calculate_green_score() < 100
         assert result.calculate_security_score() < 100
 
     def test_result_string_representation(self):
         """Test string representation of result."""
-        result = AnalysisResult(
-            file_path="test.py",
-            issues=self.sample_issues
-        )
-        
+        result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
+
         str_repr = str(result)
         assert "AnalysisResult" in str_repr
         assert "test.py" in str_repr

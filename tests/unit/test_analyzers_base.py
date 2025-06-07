@@ -5,17 +5,15 @@ This module tests the base analyzer classes and rule framework.
 """
 
 import ast
-from unittest.mock import patch, MagicMock
 
-import pytest
 
-from ecoguard_ai.analyzers.base import BaseAnalyzer, BaseRule, ASTVisitorRule
-from ecoguard_ai.core.issue import Issue, Severity
+from ecoguard_ai.analyzers.base import ASTVisitorRule, BaseAnalyzer, BaseRule
+from ecoguard_ai.core.issue import Issue
 
 
 class ConcreteAnalyzer(BaseAnalyzer):
     """Concrete implementation for testing."""
-    
+
     def analyze(self, tree: ast.AST, source_code: str, file_path: str):
         """Simple implementation for testing."""
         issues = []
@@ -32,22 +30,24 @@ class ConcreteAnalyzer(BaseAnalyzer):
 
 class ConcreteRule(BaseRule):
     """Concrete implementation for testing."""
-    
+
     def check(self, node: ast.AST, source_code: str, file_path: str):
         """Simple implementation for testing."""
-        return [Issue(
-            rule_id=self.rule_id,
-            message="Test issue",
-            severity=self.severity,
-            category=self.category,
-            file_path=file_path,
-            line=1
-        )]
+        return [
+            Issue(
+                rule_id=self.rule_id,
+                message="Test issue",
+                severity=self.severity,
+                category=self.category,
+                file_path=file_path,
+                line=1,
+            )
+        ]
 
 
 class ConcreteASTRule(ASTVisitorRule):
     """Concrete implementation for testing."""
-    
+
     def visit_FunctionDef(self, node):
         """Test visitor method."""
         self.add_issue(f"Function found: {node.name}", node)
@@ -69,7 +69,7 @@ class TestBaseAnalyzer:
         """Test registering a rule."""
         analyzer = ConcreteAnalyzer("Test", "Test analyzer")
         rule = ConcreteRule("test_rule", "Test Rule", "Test description", "quality")
-        
+
         analyzer.register_rule(rule)
         assert "test_rule" in analyzer.rules
         assert analyzer.rules["test_rule"] == rule
@@ -79,11 +79,11 @@ class TestBaseAnalyzer:
         analyzer = ConcreteAnalyzer("Test", "Test analyzer")
         rule = ConcreteRule("test_rule", "Test Rule", "Test description", "quality")
         analyzer.register_rule(rule)
-        
+
         # Test disabling
         analyzer.disable_rule("test_rule")
         assert not analyzer.rules["test_rule"].enabled
-        
+
         # Test enabling
         analyzer.enable_rule("test_rule")
         assert analyzer.rules["test_rule"].enabled
@@ -93,11 +93,11 @@ class TestBaseAnalyzer:
         analyzer = ConcreteAnalyzer("Test", "Test analyzer")
         rule = ConcreteRule("test_rule", "Test Rule", "Test description", "quality")
         analyzer.register_rule(rule)
-        
+
         code = "def test(): pass"
         tree = ast.parse(code)
         issues = analyzer.analyze(tree, code, "test.py")
-        
+
         assert len(issues) == 1
         assert issues[0].rule_id == "test_rule"
 
@@ -112,9 +112,9 @@ class TestBaseRule:
             name="Test Rule",
             description="Test description",
             category="quality",
-            severity="warning"
+            severity="warning",
         )
-        
+
         assert rule.rule_id == "test_rule"
         assert rule.name == "Test Rule"
         assert rule.description == "Test description"
@@ -125,10 +125,10 @@ class TestBaseRule:
     def test_create_issue(self):
         """Test creating an issue."""
         rule = ConcreteRule("test_rule", "Test Rule", "Test description", "quality")
-        
+
         node = ast.parse("x = 1").body[0]
         issue = rule.create_issue("Test message", node, "test.py")
-        
+
         assert issue.rule_id == "test_rule"
         assert issue.message == "Test message"
         assert issue.file_path == "test.py"
@@ -143,9 +143,9 @@ class TestASTVisitorRule:
             rule_id="ast_rule",
             name="AST Rule",
             description="AST test rule",
-            category="quality"
+            category="quality",
         )
-        
+
         assert rule.rule_id == "ast_rule"
         assert rule.issues == []
         assert rule.current_source_code == ""
@@ -155,11 +155,11 @@ class TestASTVisitorRule:
         """Test checking code with visitor pattern."""
         rule = ConcreteASTRule(
             rule_id="ast_rule",
-            name="AST Rule", 
+            name="AST Rule",
             description="AST test rule",
-            category="quality"
+            category="quality",
         )
-        
+
         code = """
 def test_function():
     pass
@@ -169,7 +169,7 @@ def another_function():
 """
         tree = ast.parse(code)
         issues = rule.check(tree, code, "test.py")
-        
+
         # Should find two functions
         assert len(issues) == 2
         assert all("Function found:" in issue.message for issue in issues)
@@ -179,20 +179,20 @@ def another_function():
         rule = ConcreteASTRule(
             rule_id="ast_rule",
             name="AST Rule",
-            description="AST test rule", 
-            category="quality"
+            description="AST test rule",
+            category="quality",
         )
-        
+
         rule.reset("test.py", "code")
         assert rule.current_file_path == "test.py"
         assert rule.current_source_code == "code"
         assert rule.issues == []
-        
+
         # Add an issue and reset
         node = ast.parse("x = 1").body[0]
         rule.add_issue("Test", node)
         assert len(rule.issues) == 1
-        
+
         rule.reset("test2.py", "code2")
         assert rule.issues == []
 
@@ -202,12 +202,12 @@ def another_function():
             rule_id="ast_rule",
             name="AST Rule",
             description="AST test rule",
-            category="quality"
+            category="quality",
         )
-        
+
         rule.reset("test.py", "x = 1")
         node = ast.parse("x = 1").body[0]
-        
+
         rule.add_issue("Test issue", node)
         assert len(rule.issues) == 1
         assert rule.issues[0].message == "Test issue"
