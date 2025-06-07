@@ -265,9 +265,17 @@ def _display_table_result(result: AnalysisResult) -> None:
 
     for issue in result.issues:
         # Handle Union types by converting to proper enum types
-        severity = issue.severity if isinstance(issue.severity, Severity) else Severity(issue.severity)
-        category = issue.category if isinstance(issue.category, Category) else Category(issue.category)
-        
+        severity = (
+            issue.severity
+            if isinstance(issue.severity, Severity)
+            else Severity(issue.severity)
+        )
+        category = (
+            issue.category
+            if isinstance(issue.category, Category)
+            else Category(issue.category)
+        )
+
         severity_color = _get_severity_color(severity)
         issues_table.add_row(
             str(issue.line),

@@ -1,5 +1,5 @@
 # Makefile for EcoGuard AI Development
-# 
+#
 # This Makefile provides convenient commands for common development tasks.
 # It works on Linux, macOS, and Windows (with make installed).
 

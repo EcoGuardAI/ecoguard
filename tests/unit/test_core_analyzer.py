@@ -9,7 +9,7 @@ from ecoguard_ai.core.result import AnalysisResult
 class TestAnalysisConfig:
     """Tests for AnalysisConfig."""
 
-    def test_default_config(self):
+    def test_default_config(self) -> None:
         """Test default configuration values."""
         config = AnalysisConfig()
 
@@ -22,7 +22,7 @@ class TestAnalysisConfig:
         assert config.output_format == "json"
         assert config.min_severity == "info"
 
-    def test_custom_config(self):
+    def test_custom_config(self) -> None:
         """Test custom configuration values."""
         config = AnalysisConfig(
             include_patterns=["*.py", "*.pyi"],
@@ -40,7 +40,7 @@ class TestAnalysisConfig:
 class TestEcoGuardAnalyzer:
     """Tests for EcoGuardAnalyzer."""
 
-    def test_analyzer_initialization(self):
+    def test_analyzer_initialization(self) -> None:
         """Test analyzer initialization with default config."""
         analyzer = EcoGuardAnalyzer()
 
@@ -50,19 +50,19 @@ class TestEcoGuardAnalyzer:
         # return no issues
         assert isinstance(analyzer._analyzers, list)
 
-    def test_analyzer_with_custom_config(self):
+    def test_analyzer_with_custom_config(self) -> None:
         """Test analyzer initialization with custom config."""
         config = AnalysisConfig(enable_security=False)
         analyzer = EcoGuardAnalyzer(config)
 
         assert analyzer.config.enable_security is False
 
-    def test_analyze_file_nonexistent(self, analyzer):
+    def test_analyze_file_nonexistent(self, analyzer) -> None:
         """Test analyzing a non-existent file."""
         with pytest.raises(FileNotFoundError):
             analyzer.analyze_file("nonexistent.py")
 
-    def test_analyze_file_non_python(self, analyzer, temp_dir):
+    def test_analyze_file_non_python(self, analyzer, temp_dir) -> None:
         """Test analyzing a non-Python file."""
         txt_file = temp_dir / "test.txt"
         txt_file.write_text("Hello, world!")
@@ -70,7 +70,7 @@ class TestEcoGuardAnalyzer:
         with pytest.raises(ValueError, match="Only Python files are supported"):
             analyzer.analyze_file(txt_file)
 
-    def test_analyze_valid_file(self, analyzer, sample_python_file):
+    def test_analyze_valid_file(self, analyzer, sample_python_file) -> None:
         """Test analyzing a valid Python file."""
         result = analyzer.analyze_file(sample_python_file)
 
@@ -82,7 +82,7 @@ class TestEcoGuardAnalyzer:
         assert "file_size" in result.metadata
         assert "line_count" in result.metadata
 
-    def test_analyze_file_with_syntax_error(self, analyzer, temp_dir):
+    def test_analyze_file_with_syntax_error(self, analyzer, temp_dir) -> None:
         """Test analyzing a file with syntax errors."""
         bad_file = temp_dir / "bad.py"
         bad_file.write_text(
@@ -96,19 +96,19 @@ class TestEcoGuardAnalyzer:
         assert result.issues[0].rule_id == "syntax_error"
         assert result.issues[0].severity.value == "error"
 
-    def test_analyze_directory_nonexistent(self, analyzer):
+    def test_analyze_directory_nonexistent(self, analyzer) -> None:
         """Test analyzing a non-existent directory."""
         with pytest.raises(FileNotFoundError):
             analyzer.analyze_directory("nonexistent_dir")
 
-    def test_analyze_directory_empty(self, analyzer, temp_dir):
+    def test_analyze_directory_empty(self, analyzer, temp_dir) -> None:
         """Test analyzing an empty directory."""
         results = analyzer.analyze_directory(temp_dir)
 
         assert isinstance(results, list)
         assert len(results) == 0
 
-    def test_analyze_directory_with_files(self, analyzer, temp_dir):
+    def test_analyze_directory_with_files(self, analyzer, temp_dir) -> None:
         """Test analyzing a directory with Python files."""
         # Create multiple Python files
         file1 = temp_dir / "file1.py"
@@ -138,7 +138,9 @@ class TestEcoGuardAnalyzer:
         assert str(file3) in file_paths
         assert str(txt_file) not in file_paths
 
-    def test_minimal_analyzer_no_issues(self, minimal_analyzer, sample_python_file):
+    def test_minimal_analyzer_no_issues(
+        self, minimal_analyzer, sample_python_file
+    ) -> None:
         """Test that analyzer with all modules disabled finds no issues."""
         result = minimal_analyzer.analyze_file(sample_python_file)
 

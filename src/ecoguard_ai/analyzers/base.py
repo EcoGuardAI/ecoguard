@@ -227,7 +227,9 @@ def get_source_segment(source_code: str, node: ast.AST) -> str:
             elif i == end_line:
                 # Last line
                 end_col_attr = getattr(node, "end_col_offset", len(lines[i]))
-                line_end_col: int = int(end_col_attr) if end_col_attr is not None else len(lines[i])
+                line_end_col: int = (
+                    int(end_col_attr) if end_col_attr is not None else len(lines[i])
+                )
                 result_lines.append(lines[i][:line_end_col])
             else:
                 # Middle lines

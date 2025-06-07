@@ -14,7 +14,7 @@ from ecoguard_ai.core.result import AnalysisResult
 class TestAnalysisResult:
     """Tests for AnalysisResult class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         self.sample_issues = [
             Issue(
@@ -46,7 +46,7 @@ class TestAnalysisResult:
             ),
         ]
 
-    def test_basic_initialization(self):
+    def test_basic_initialization(self) -> None:
         """Test basic AnalysisResult initialization."""
         result = AnalysisResult(file_path="test.py")
 
@@ -55,7 +55,7 @@ class TestAnalysisResult:
         assert isinstance(result.analysis_time, datetime)
         assert result.issue_count == 0
 
-    def test_initialization_with_issues(self):
+    def test_initialization_with_issues(self) -> None:
         """Test AnalysisResult initialization with issues."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -63,7 +63,7 @@ class TestAnalysisResult:
         assert len(result.issues) == 3
         assert result.issue_count == 3
 
-    def test_add_issue(self):
+    def test_add_issue(self) -> None:
         """Test adding issues to result."""
         result = AnalysisResult(file_path="test.py")
 
@@ -82,13 +82,13 @@ class TestAnalysisResult:
         assert len(result.issues) == 1
         assert result.issue_count == 1
 
-    def test_issue_count_property(self):
+    def test_issue_count_property(self) -> None:
         """Test issue count property."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
         assert result.issue_count == 3
 
-    def test_get_issues_by_severity(self):
+    def test_get_issues_by_severity(self) -> None:
         """Test getting issues by severity."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -104,7 +104,7 @@ class TestAnalysisResult:
         assert len(info_issues) == 1
         assert info_issues[0].rule_id == "inefficient_loop"
 
-    def test_get_issues_by_category(self):
+    def test_get_issues_by_category(self) -> None:
         """Test getting issues by category."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -120,7 +120,7 @@ class TestAnalysisResult:
         assert len(green_issues) == 1
         assert green_issues[0].rule_id == "inefficient_loop"
 
-    def test_get_issues_by_rule(self):
+    def test_get_issues_by_rule(self) -> None:
         """Test getting issues by rule ID."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -128,7 +128,7 @@ class TestAnalysisResult:
         assert len(unused_var_issues) == 1
         assert unused_var_issues[0].message == "Variable 'x' is unused"
 
-    def test_severity_count_properties(self):
+    def test_severity_count_properties(self) -> None:
         """Test severity count properties."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -137,7 +137,7 @@ class TestAnalysisResult:
         assert result.warning_count == 1
         assert result.info_count == 1
 
-    def test_calculate_green_score(self):
+    def test_calculate_green_score(self) -> None:
         """Test green score calculation."""
         # Test with no issues
         empty_result = AnalysisResult(file_path="test.py", issues=[])
@@ -164,7 +164,7 @@ class TestAnalysisResult:
         # Should be less than 100 due to critical security issue
         assert score < 100
 
-    def test_green_score_with_error_level_issues(self):
+    def test_green_score_with_error_level_issues(self) -> None:
         """Test green score calculation with error level green issues."""
         error_green_issue = Issue(
             rule_id="energy_inefficient",
@@ -180,7 +180,7 @@ class TestAnalysisResult:
         score = result.calculate_green_score()
         assert score == 85.0  # 100 - 15 penalty for ERROR level
 
-    def test_green_score_with_info_level_issues(self):
+    def test_green_score_with_info_level_issues(self) -> None:
         """Test green score calculation with info level green issues."""
         info_green_issue = Issue(
             rule_id="minor_inefficiency",
@@ -196,7 +196,7 @@ class TestAnalysisResult:
         score = result.calculate_green_score()
         assert score == 95.0  # 100 - 5 penalty for INFO level
 
-    def test_security_score_with_error_level_issues(self):
+    def test_security_score_with_error_level_issues(self) -> None:
         """Test security score calculation with error level security issues."""
         error_security_issue = Issue(
             rule_id="sql_injection",
@@ -212,7 +212,7 @@ class TestAnalysisResult:
         score = result.calculate_security_score()
         assert score == 80.0  # 100 - 20 penalty for ERROR level
 
-    def test_security_score_with_warning_level_issues(self):
+    def test_security_score_with_warning_level_issues(self) -> None:
         """Test security score calculation with warning level security issues."""
         warning_security_issue = Issue(
             rule_id="weak_crypto",
@@ -228,7 +228,7 @@ class TestAnalysisResult:
         score = result.calculate_security_score()
         assert score == 90.0  # 100 - 10 penalty for WARNING level
 
-    def test_security_score_with_info_level_issues(self):
+    def test_security_score_with_info_level_issues(self) -> None:
         """Test security score calculation with info level security issues."""
         info_security_issue = Issue(
             rule_id="security_best_practice",
@@ -244,7 +244,7 @@ class TestAnalysisResult:
         score = result.calculate_security_score()
         assert score == 97.0  # 100 - 3 penalty for INFO level
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test converting result to dictionary."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -259,7 +259,7 @@ class TestAnalysisResult:
         assert len(data["issues"]) == 3
         assert data["summary"]["total_issues"] == 3
 
-    def test_to_dict_with_metadata(self):
+    def test_to_dict_with_metadata(self) -> None:
         """Test to_dict method includes metadata."""
         metadata = {"test_key": "test_value", "analyzer_version": "1.0.0"}
         result = AnalysisResult(
@@ -270,7 +270,7 @@ class TestAnalysisResult:
         assert "metadata" in data
         assert data["metadata"] == metadata
 
-    def test_to_json(self):
+    def test_to_json(self) -> None:
         """Test converting result to JSON."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -283,7 +283,7 @@ class TestAnalysisResult:
         assert "summary" in data
         assert "issues" in data
 
-    def test_to_json_with_indent(self):
+    def test_to_json_with_indent(self) -> None:
         """Test converting result to formatted JSON."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -295,7 +295,7 @@ class TestAnalysisResult:
         data = json.loads(json_str)
         assert data["file_path"] == "test.py"
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         """Test creating result from dictionary."""
         original_result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -306,7 +306,7 @@ class TestAnalysisResult:
         assert len(restored_result.issues) == len(original_result.issues)
         assert restored_result.issue_count == original_result.issue_count
 
-    def test_from_json(self):
+    def test_from_json(self) -> None:
         """Test creating result from JSON."""
         original_result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -317,7 +317,7 @@ class TestAnalysisResult:
         assert len(restored_result.issues) == len(original_result.issues)
         assert restored_result.issue_count == original_result.issue_count
 
-    def test_empty_result(self):
+    def test_empty_result(self) -> None:
         """Test result with no issues."""
         result = AnalysisResult(file_path="test.py")
 
@@ -325,7 +325,7 @@ class TestAnalysisResult:
         assert result.calculate_green_score() == 100.0
         assert result.calculate_security_score() == 100.0
 
-    def test_result_with_mixed_severities(self):
+    def test_result_with_mixed_severities(self) -> None:
         """Test result calculations with mixed severity issues."""
         mixed_issues = [
             Issue(
@@ -373,7 +373,7 @@ class TestAnalysisResult:
         assert result.calculate_green_score() < 100
         assert result.calculate_security_score() < 100
 
-    def test_result_string_representation(self):
+    def test_result_string_representation(self) -> None:
         """Test string representation of result."""
         result = AnalysisResult(file_path="test.py", issues=self.sample_issues)
 
@@ -381,10 +381,14 @@ class TestAnalysisResult:
         assert "AnalysisResult" in str_repr
         assert "test.py" in str_repr
 
-    def test_helper_functions(self):
+    def test_helper_functions(self) -> None:
         """Test the private helper functions in result module."""
-        from ecoguard_ai.core.result import _matches_severity, _matches_category, _get_severity_enum
-        from ecoguard_ai.core.issue import Issue, Severity, Category
+        from ecoguard_ai.core.issue import Category, Issue, Severity
+        from ecoguard_ai.core.result import (
+            _get_severity_enum,
+            _matches_category,
+            _matches_severity,
+        )
 
         # Test _matches_severity
         issue = Issue(
@@ -429,9 +433,9 @@ class TestAnalysisResult:
         assert _get_severity_enum(issue) == Severity.WARNING
         assert _get_severity_enum(issue_invalid) == Severity.INFO  # Default fallback
 
-    def test_analysis_result_filter_edge_cases(self):
+    def test_analysis_result_filter_edge_cases(self) -> None:
         """Test edge cases in AnalysisResult filtering methods."""
-        from ecoguard_ai.core.issue import Issue, Severity, Category
+        from ecoguard_ai.core.issue import Category, Issue, Severity
         from ecoguard_ai.core.result import AnalysisResult
 
         # Create result with mixed severity/category types
@@ -469,9 +473,9 @@ class TestAnalysisResult:
         assert len(quality_issues) == 1
         assert quality_issues[0].rule_id == "test1"
 
-    def test_project_analysis_result_filtering(self):
+    def test_project_analysis_result_filtering(self) -> None:
         """Test ProjectAnalysisResult filtering capabilities."""
-        from ecoguard_ai.core.issue import Issue, Severity, Category
+        from ecoguard_ai.core.issue import Category, Issue, Severity
         from ecoguard_ai.core.result import AnalysisResult, ProjectAnalysisResult
 
         # Create multiple file results
@@ -513,5 +517,7 @@ class TestAnalysisResult:
         assert len(all_issues) == 2
 
         # Test filtering across all files
-        error_issues = [issue for issue in all_issues if issue.severity == Severity.ERROR]
+        error_issues = [
+            issue for issue in all_issues if issue.severity == Severity.ERROR
+        ]
         assert len(error_issues) == 1

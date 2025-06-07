@@ -34,9 +34,9 @@ def runner():
 @pytest.fixture
 def temp_python_file(tmp_path):
     """Create a temporary Python file for testing."""
-    content = '''def example_function():
+    content = """def example_function():
     return "Hello, World!"
-'''
+"""
     file_path = tmp_path / "test_file.py"
     file_path.write_text(content)
     return file_path
@@ -69,13 +69,13 @@ def windows_safe_tempfile(content: str, suffix: str = ".py"):
 class TestCLIMain:
     """Test main CLI entry points."""
 
-    def test_main_function_calls_cli(self):
+    def test_main_function_calls_cli(self) -> None:
         """Test that main() calls the CLI."""
         with patch("ecoguard_ai.cli.cli") as mock_cli:
             main()
             mock_cli.assert_called_once()
 
-    def test_main_with_args(self):
+    def test_main_with_args(self) -> None:
         """Test main function with command line arguments."""
         runner = CliRunner()
         result = runner.invoke(cli, ["--help"])
@@ -86,21 +86,21 @@ class TestCLIMain:
 class TestCLICommands:
     """Test CLI commands."""
 
-    def test_version_command(self, runner):
+    def test_version_command(self, runner) -> None:
         """Test version command output."""
         result = runner.invoke(cli, ["version"])
         assert result.exit_code == 0
         assert "EcoGuard AI v0.1.2" in result.output
         assert "AI-augmented software development pipeline solution" in result.output
 
-    def test_version_subcommand(self):
+    def test_version_subcommand(self) -> None:
         """Test version subcommand."""
         runner = CliRunner()
         result = runner.invoke(cli, ["version"])
         assert result.exit_code == 0
         assert "EcoGuard AI" in result.output
 
-    def test_help_command(self):
+    def test_help_command(self) -> None:
         """Test help command."""
         runner = CliRunner()
         result = runner.invoke(cli, ["--help"])
@@ -110,14 +110,14 @@ class TestCLICommands:
         assert "rules" in result.output
         assert "version" in result.output
 
-    def test_analyze_help(self):
+    def test_analyze_help(self) -> None:
         """Test analyze command help."""
         runner = CliRunner()
         result = runner.invoke(cli, ["analyze", "--help"])
         assert result.exit_code == 0
         assert "Analyze Python code" in result.output
 
-    def test_rules_help(self):
+    def test_rules_help(self) -> None:
         """Test rules command help."""
         runner = CliRunner()
         result = runner.invoke(cli, ["rules", "--help"])
@@ -127,13 +127,13 @@ class TestCLICommands:
 class TestAnalyzeCommand:
     """Test the analyze command."""
 
-    def test_analyze_nonexistent_file(self):
+    def test_analyze_nonexistent_file(self) -> None:
         """Test analyze command with nonexistent file."""
         runner = CliRunner()
         result = runner.invoke(cli, ["analyze", "nonexistent_file.py"])
         assert result.exit_code == 2  # Click validation error
 
-    def test_analyze_with_valid_file(self):
+    def test_analyze_with_valid_file(self) -> None:
         """Test analyze command with valid Python file."""
         with windows_safe_tempfile("print('hello world')") as temp_file:
             runner = CliRunner()
@@ -142,19 +142,28 @@ class TestAnalyzeCommand:
             # on issues found)
             assert result.exit_code in [0, 1]
 
-    def test_analyze_with_config_option(self, runner, temp_python_file, tmp_path):
+    def test_analyze_with_config_option(
+        self, runner, temp_python_file, tmp_path
+    ) -> None:
         """Test analyze command with config option."""
         # Create a temporary config file
         config_file = tmp_path / "config.yaml"
         config_file.write_text("# Test config file\n")
-        
-        result = runner.invoke(cli, ["analyze", str(temp_python_file), "--config", str(config_file)])
-        # Should show config warning but still work
-        assert result.exit_code == 0 or "Config file support coming in future release" in result.output
 
-    def test_analyze_with_format_json(self, runner, temp_python_file):
+        result = runner.invoke(
+            cli, ["analyze", str(temp_python_file), "--config", str(config_file)]
+        )
+        # Should show config warning but still work
+        assert (
+            result.exit_code == 0
+            or "Config file support coming in future release" in result.output
+        )
+
+    def test_analyze_with_format_json(self, runner, temp_python_file) -> None:
         """Test analyze command with JSON output format."""
-        result = runner.invoke(cli, ["analyze", str(temp_python_file), "--format", "json"])
+        result = runner.invoke(
+            cli, ["analyze", str(temp_python_file), "--format", "json"]
+        )
         assert result.exit_code == 0
         # JSON output should be parseable
         try:
@@ -163,7 +172,7 @@ class TestAnalyzeCommand:
             # If not valid JSON, at least check it ran
             pass
 
-    def test_analyze_directory(self):
+    def test_analyze_directory(self) -> None:
         """Test analyze command with directory."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create a Python file in the directory
@@ -174,35 +183,37 @@ class TestAnalyzeCommand:
             result = runner.invoke(cli, ["analyze", temp_dir])
             assert result.exit_code in [0, 1]
 
-    def test_analyze_directory_with_errors(self, runner, tmp_path):
+    def test_analyze_directory_with_errors(self, runner, tmp_path) -> None:
         """Test analyze command on directory that causes errors."""
         # Create a directory with Python files that might have issues
         test_dir = tmp_path / "test_project"
         test_dir.mkdir()
-        
+
         # Create a file with potential issues
-        (test_dir / "test.py").write_text("""
+        (test_dir / "test.py").write_text(
+            """
 # File with unused variable
-def test_func():
+def test_func() -> None:
     unused_var = 42
     return "hello"
-""")
-        
+"""
+        )
+
         result = runner.invoke(cli, ["analyze", str(test_dir)])
         # Command should complete (exit codes handled by analyzer)
         assert isinstance(result.exit_code, int)
 
-    def test_analyze_file_error_exit_code(self, runner, tmp_path):
+    def test_analyze_file_error_exit_code(self, runner, tmp_path) -> None:
         """Test that analyze exits with error code when critical issues found."""
         # Create a file that might trigger error-level issues
         test_file = tmp_path / "error_file.py"
         test_file.write_text("# This might not trigger errors, but test the path")
-        
+
         result = runner.invoke(cli, ["analyze", str(test_file)])
         # Exit code should be 0 or 1 depending on analysis results
         assert result.exit_code in [0, 1]
 
-    def test_analyze_with_invalid_format(self):
+    def test_analyze_with_invalid_format(self) -> None:
         """Test analyze command with invalid format."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("print('hello world')")
@@ -216,7 +227,7 @@ def test_func():
             finally:
                 Path(f.name).unlink(missing_ok=True)
 
-    def test_analyze_with_severity_filter(self):
+    def test_analyze_with_severity_filter(self) -> None:
         """Test analyze command with severity filtering."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("import unused_module\ndef test(): pass")
@@ -229,7 +240,7 @@ def test_func():
             finally:
                 Path(f.name).unlink(missing_ok=True)
 
-    def test_analyze_with_disabled_modules(self):
+    def test_analyze_with_disabled_modules(self) -> None:
         """Test analyze command with disabled analysis modules."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("print('hello world')")
@@ -256,7 +267,7 @@ def test_func():
 class TestRulesCommand:
     """Test the rules command."""
 
-    def test_rules_list(self):
+    def test_rules_list(self) -> None:
         """Test rules list command."""
         runner = CliRunner()
         result = runner.invoke(cli, ["rules"])
@@ -267,7 +278,7 @@ class TestRulesCommand:
 class TestCLIHelpers:
     """Test CLI helper functions."""
 
-    def test_get_severity_color(self):
+    def test_get_severity_color(self) -> None:
         """Test severity color mapping function."""
         assert _get_severity_color(Severity.DEBUG) == "dim"
         assert _get_severity_color(Severity.INFO) == "blue"
@@ -275,7 +286,7 @@ class TestCLIHelpers:
         assert _get_severity_color(Severity.ERROR) == "red"
         assert _get_severity_color(Severity.CRITICAL) == "red bold"
 
-    def test_display_single_result_with_issues(self):
+    def test_display_single_result_with_issues(self) -> None:
         """Test display function with issues present."""
         issues = [
             Issue(
@@ -296,7 +307,7 @@ class TestCLIHelpers:
             _display_single_result(result, "table", None)
             assert mock_console.print.called
 
-    def test_display_single_result_json_format(self):
+    def test_display_single_result_json_format(self) -> None:
         """Test display function with JSON format."""
         result = AnalysisResult(file_path="test.py", issues=[])
 
@@ -305,7 +316,7 @@ class TestCLIHelpers:
             _display_single_result(result, "json", None)
             assert mock_console.print.called
 
-    def test_display_single_result_text_format(self):
+    def test_display_single_result_text_format(self) -> None:
         """Test display function with text format."""
         result = AnalysisResult(file_path="test.py", issues=[])
 
@@ -314,7 +325,7 @@ class TestCLIHelpers:
             _display_single_result(result, "text", None)
             assert mock_console.print.called
 
-    def test_display_project_result_with_issues(self):
+    def test_display_project_result_with_issues(self) -> None:
         """Test project display function with issues."""
         file_results = [
             AnalysisResult(
@@ -341,7 +352,7 @@ class TestCLIHelpers:
             _display_project_result(project_result, "table", None)
             assert mock_console.print.called
 
-    def test_display_project_result_no_issues(self):
+    def test_display_project_result_no_issues(self) -> None:
         """Test project display function with no issues."""
         file_results = [
             AnalysisResult(file_path="test1.py", issues=[]),
@@ -360,7 +371,7 @@ class TestCLIHelpers:
 class TestCLIIntegration:
     """Integration tests for the CLI."""
 
-    def test_cli_with_empty_file(self):
+    def test_cli_with_empty_file(self) -> None:
         """Test CLI with empty Python file."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("")  # Empty file
@@ -373,7 +384,7 @@ class TestCLIIntegration:
             finally:
                 Path(f.name).unlink(missing_ok=True)
 
-    def test_cli_with_complex_code(self):
+    def test_cli_with_complex_code(self) -> None:
         """Test CLI with complex code that triggers multiple rules."""
         complex_code = '''
 import os
@@ -412,7 +423,7 @@ class TestClass:
             finally:
                 Path(f.name).unlink(missing_ok=True)
 
-    def test_cli_with_syntax_error(self):
+    def test_cli_with_syntax_error(self) -> None:
         """Test CLI with file containing syntax errors."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("def invalid_syntax(:\n    pass")

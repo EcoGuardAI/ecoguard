@@ -1,23 +1,27 @@
 """Sample code with various issues for testing EcoGuard AI."""
 
-import os
-import sys
-import unused_module  # This should trigger unused import
+# import os  # Unused import for testing
+# import sys  # Unused import for testing
+from typing import Any, List
 
-def inefficient_function():
+# import unused_module  # Unused import for testing
+
+
+def inefficient_function() -> str:
     """This function has several issues."""
-    
+
     # Inefficient string concatenation in loop
     result = ""
     for i in range(100):
         result = result + str(i) + ", "  # Should trigger green rule
-    
+
     # Unused variable
-    unused_var = "This variable is never used"
-    
+    unused_var = "This variable is never used"  # noqa: F841
+
     return result
 
-def complex_function(a, b, c, d, e, f, g):  # Too many parameters
+
+def complex_function(a: Any, b: Any, c: Any, d: Any, e: Any, f: Any, g: Any) -> str:
     """Function with high complexity."""
     if a:
         if b:
@@ -42,8 +46,8 @@ def complex_function(a, b, c, d, e, f, g):  # Too many parameters
     else:
         return "a false"
 
-# Verbose AI-generated pattern
-def verbose_check(data):
+
+def verbose_check(data: Any) -> bool:
     if data is not None:
         if len(data) > 0:
             return True
@@ -52,17 +56,20 @@ def verbose_check(data):
     else:
         return False
 
+
 # Range/len anti-pattern
-def inefficient_loop(items):
+def inefficient_loop(items: List[Any]) -> None:
     for i in range(len(items)):
         print(f"Item {i}: {items[i]}")
 
+
 # Redundant variable assignment
-def redundant_return():
+def redundant_return() -> int:
     result = 42
     return result
 
+
 # List that could be generator
-def could_be_generator():
+def could_be_generator() -> int:
     data = [x * 2 for x in range(1000)]
     return sum(data)

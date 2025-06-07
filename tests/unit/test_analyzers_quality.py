@@ -18,7 +18,7 @@ class TestQualityAnalyzer:
         """Set up test fixtures."""
         self.analyzer = QualityAnalyzer()
 
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         """Test QualityAnalyzer initialization."""
         assert self.analyzer.name == "Quality Analyzer"
         assert len(self.analyzer.rules) > 0
@@ -29,7 +29,7 @@ class TestQualityAnalyzer:
         assert "function_complexity" in self.analyzer.rules
         assert "too_many_params" in self.analyzer.rules
 
-    def test_analyze_clean_code(self):
+    def test_analyze_clean_code(self) -> None:
         """Test analyzing clean code with no issues."""
         code = '''
 def greet(name):
@@ -45,7 +45,7 @@ print(result)
         # Should have minimal or no issues
         assert isinstance(issues, list)
 
-    def test_analyze_code_with_issues(self):
+    def test_analyze_code_with_issues(self) -> None:
         """Test analyzing code with quality issues."""
         code = """
 import os
@@ -71,18 +71,18 @@ def complex_function(a, b, c, d, e, f, g):
 class TestUnusedImportRule:
     """Test the UnusedImportRule class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         self.analyzer = QualityAnalyzer()
 
-    def test_rule_initialization(self):
+    def test_rule_initialization(self) -> None:
         """Test rule initialization."""
         rule = self.analyzer.rules["unused_import"]
         assert rule.rule_id == "unused_import"
         assert rule.severity == "info"
         assert rule.category == "quality"
 
-    def test_detect_unused_import(self):
+    def test_detect_unused_import(self) -> None:
         """Test detecting unused imports."""
         code = """
 import os
@@ -104,7 +104,7 @@ print("Hello world")
             assert issue.rule_id == "unused_import"
             assert "not used" in issue.message or "unused" in issue.message.lower()
 
-    def test_detect_used_import(self):
+    def test_detect_used_import(self) -> None:
         """Test that used imports are not flagged."""
         code = """
 import os
@@ -121,7 +121,7 @@ sys.exit(0)
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         assert len(unused_import_issues) == 0
 
-    def test_detect_from_import_unused(self):
+    def test_detect_from_import_unused(self) -> None:
         """Test detecting unused from imports."""
         code = """
 from os import path, getcwd
@@ -137,7 +137,7 @@ print("Hello world")
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         assert len(unused_import_issues) > 0  # All imports are unused
 
-    def test_detect_from_import_partial_use(self):
+    def test_detect_from_import_partial_use(self) -> None:
         """Test detecting partially used from imports."""
         code = """
 from os import path, getcwd
@@ -156,7 +156,7 @@ print(getcwd())  # Only getcwd is used
         unused_names = [issue.message for issue in unused_import_issues]
         assert any("path" in msg for msg in unused_names)
 
-    def test_import_alias_unused(self):
+    def test_import_alias_unused(self) -> None:
         """Test detecting unused import aliases."""
         code = """
 import numpy as np
@@ -172,7 +172,7 @@ print("Hello world")
         unused_import_issues = [i for i in issues if i.rule_id == "unused_import"]
         assert len(unused_import_issues) == 2
 
-    def test_import_alias_used(self):
+    def test_import_alias_used(self) -> None:
         """Test that used import aliases are not flagged."""
         code = """
 import numpy as np
@@ -192,21 +192,21 @@ print(arr)
 class TestUnusedVariableRule:
     """Test the UnusedVariableRule class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         self.analyzer = QualityAnalyzer()
 
-    def test_rule_initialization(self):
+    def test_rule_initialization(self) -> None:
         """Test rule initialization."""
         rule = self.analyzer.rules["unused_variable"]
         assert rule.rule_id == "unused_variable"
         assert rule.severity == "warning"
         assert rule.category == "quality"
 
-    def test_detect_unused_variable(self):
+    def test_detect_unused_variable(self) -> None:
         """Test detecting unused variables."""
         code = """
-def test_function():
+def test_function() -> None:
     used_var = 42
     unused_var = 24
     return used_var
@@ -222,10 +222,10 @@ def test_function():
         unused_names = [issue.message for issue in unused_var_issues]
         assert any("unused_var" in msg for msg in unused_names)
 
-    def test_detect_multiple_unused_variables(self):
+    def test_detect_multiple_unused_variables(self) -> None:
         """Test detecting multiple unused variables."""
         code = """
-def test_function():
+def test_function() -> None:
     a = 1
     b = 2
     c = 3
@@ -244,10 +244,10 @@ def test_function():
         assert any("unused1" in msg for msg in unused_names)
         assert any("unused2" in msg for msg in unused_names)
 
-    def test_ignore_underscore_variables(self):
+    def test_ignore_underscore_variables(self) -> None:
         """Test that underscore variables are ignored."""
         code = """
-def test_function():
+def test_function() -> None:
     _ = some_function()
     _temp = another_function()
     used_var = 42
@@ -263,7 +263,7 @@ def test_function():
         # Should not flag underscore variables
         assert len(unused_var_issues) == 0
 
-    def test_variable_used_in_nested_scope(self):
+    def test_variable_used_in_nested_scope(self) -> None:
         """Test that variables used in nested scopes are not flagged."""
         code = """
 def outer_function():
@@ -292,18 +292,18 @@ def outer_function():
 class TestLongParameterListRule:
     """Test the LongParameterListRule class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         self.analyzer = QualityAnalyzer()
 
-    def test_rule_initialization(self):
+    def test_rule_initialization(self) -> None:
         """Test rule initialization."""
         rule = self.analyzer.rules["too_many_params"]
         assert rule.rule_id == "too_many_params"
         assert rule.severity == "info"
         assert rule.category == "quality"
 
-    def test_detect_too_many_parameters(self):
+    def test_detect_too_many_parameters(self) -> None:
         """Test detecting functions with too many parameters."""
         code = """
 def complex_function(a, b, c, d, e, f, g):
@@ -319,7 +319,7 @@ def complex_function(a, b, c, d, e, f, g):
         # Check that the issue mentions parameters
         assert any("parameter" in issue.message.lower() for issue in param_issues)
 
-    def test_function_with_acceptable_parameters(self):
+    def test_function_with_acceptable_parameters(self) -> None:
         """Test that functions with acceptable parameter count are not flagged."""
         code = """
 def simple_function(a, b, c):
@@ -336,7 +336,7 @@ def another_function(x, y, z, w, v):
         param_issues = [i for i in issues if i.rule_id == "too_many_params"]
         assert len(param_issues) == 0
 
-    def test_method_with_self_parameter(self):
+    def test_method_with_self_parameter(self) -> None:
         """Test that self parameter is counted correctly."""
         code = """
 class TestClass:
@@ -351,7 +351,7 @@ class TestClass:
         param_issues = [i for i in issues if i.rule_id == "too_many_params"]
         assert len(param_issues) >= 1  # 7 parameters including self
 
-    def test_function_with_default_parameters(self):
+    def test_function_with_default_parameters(self) -> None:
         """Test functions with default parameters."""
         code = """
 def function_with_defaults(a, b, c=1, d=2, e=3, f=4):
@@ -369,18 +369,18 @@ def function_with_defaults(a, b, c=1, d=2, e=3, f=4):
 class TestFunctionComplexityRule:
     """Test the FunctionComplexityRule class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         self.analyzer = QualityAnalyzer()
 
-    def test_rule_initialization(self):
+    def test_rule_initialization(self) -> None:
         """Test rule initialization."""
         rule = self.analyzer.rules["function_complexity"]
         assert rule.rule_id == "function_complexity"
         assert rule.severity == "warning"
         assert rule.category == "quality"
 
-    def test_detect_complex_function(self):
+    def test_detect_complex_function(self) -> None:
         """Test detecting functions with high complexity."""
         # Create a function with many decision points (complexity > 10)
         code = """
@@ -414,7 +414,7 @@ def complex_function(x, y, z):
         assert len(complexity_issues) >= 1
         assert any("complexity" in issue.message.lower() for issue in complexity_issues)
 
-    def test_simple_function_not_flagged(self):
+    def test_simple_function_not_flagged(self) -> None:
         """Test that simple functions are not flagged."""
         code = """
 def simple_function():
@@ -430,7 +430,7 @@ def simple_function():
         complexity_issues = [i for i in issues if i.rule_id == "function_complexity"]
         assert len(complexity_issues) == 0
 
-    def test_function_with_moderate_complexity(self):
+    def test_function_with_moderate_complexity(self) -> None:
         """Test function with moderate complexity."""
         code = """
 def moderate_function(x):
@@ -447,7 +447,7 @@ def moderate_function(x):
         complexity_issues = [i for i in issues if i.rule_id == "function_complexity"]
         assert len(complexity_issues) == 0
 
-    def test_empty_function(self):
+    def test_empty_function(self) -> None:
         """Test empty function handling."""
         code = """
 def empty_function():
@@ -461,7 +461,7 @@ def empty_function():
         complexity_issues = [i for i in issues if i.rule_id == "function_complexity"]
         assert len(complexity_issues) == 0
 
-    def test_method_complexity(self):
+    def test_method_complexity(self) -> None:
         """Test method complexity detection in classes."""
         code = """
 class TestClass:
