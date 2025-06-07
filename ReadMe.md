@@ -1,7 +1,7 @@
 # EcoGuard AI: The Sentient Core for Future-Proof Software Pipelines
 
 ![EcoGuard AI Logo](https://img.shields.io/badge/EcoGuard-AI-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-0.1.2-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-0.1.3-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)
 
 ## 🌟 Project Vision
@@ -482,6 +482,54 @@ ecoguard-ai/
 ├── .github/workflows/       # CI/CD pipelines
 └── docs/                    # Documentation
 ```
+
+## 📦 Publishing & Releases
+
+EcoGuard AI uses automated CI/CD for secure publishing to PyPI with trusted publishing.
+
+### Version Management
+
+```bash
+# Check current version
+./scripts/manage-version.sh current
+
+# Bump version (patch/minor/major)
+./scripts/manage-version.sh bump patch
+
+# Set specific version
+./scripts/manage-version.sh set 0.2.0
+
+# Create full release (recommended)
+./scripts/manage-version.sh release 0.2.0
+```
+
+### Automated Publishing
+
+- **Test PyPI**: Automatic publishing on `main` branch pushes
+- **Production PyPI**: Automatic publishing on version tags (`v*`)
+- **Trusted Publishing**: Secure, token-free publishing via OIDC
+
+### Manual Release Workflow
+
+Use GitHub Actions for controlled releases:
+
+1. Go to **Actions** → **Release workflow**
+2. Click **Run workflow**
+3. Enter version number (e.g., `0.2.0`)
+4. Optionally mark as pre-release
+
+This will:
+- Update version in all files
+- Run full test suite
+- Build and verify package
+- Create git tag and GitHub release
+- Publish to PyPI automatically
+
+### Setup for Maintainers
+
+See detailed setup instructions in:
+- [`docs/PUBLISHING.md`](docs/PUBLISHING.md) - Complete publishing guide
+- [`docs/PYPI_SETUP.md`](docs/PYPI_SETUP.md) - PyPI trusted publisher configuration
 
 ## 🤝 Contributing
 

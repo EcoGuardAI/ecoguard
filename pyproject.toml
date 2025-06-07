@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ecoguard-ai"
-version = "0.1.2"
+version = "0.1.3"
 description = "AI-augmented software development pipeline solution for quality, security, and environmental sustainability"
 readme = "ReadMe.md"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "EcoGuard AI Team", email = "team@ecoguard-ai.org"}
 ]
