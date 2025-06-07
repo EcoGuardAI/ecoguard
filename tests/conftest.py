@@ -1,11 +1,12 @@
 """Test configuration and fixtures for EcoGuard AI tests."""
 
-import pytest
 import tempfile
 from pathlib import Path
 from typing import Generator
 
-from ecoguard_ai.core.analyzer import EcoGuardAnalyzer, AnalysisConfig
+import pytest
+
+from ecoguard_ai.core.analyzer import AnalysisConfig, EcoGuardAnalyzer
 
 
 @pytest.fixture
@@ -33,7 +34,7 @@ def unused_function():
 class Calculator:
     def __init__(self):
         self.value = 0
-    
+
     def add(self, num):
         self.value += num
         return self.value
@@ -45,7 +46,7 @@ for i in range(10):
 
 print("Hello, World!")
 '''
-    
+
     file_path = temp_dir / "sample.py"
     file_path.write_text(content)
     return file_path

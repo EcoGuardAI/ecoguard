@@ -17,6 +17,6 @@ from ecoguard_ai.core.result import AnalysisResult
 __all__ = [
     "EcoGuardAnalyzer",
     "Issue",
-    "Severity", 
+    "Severity",
     "AnalysisResult",
 ]
